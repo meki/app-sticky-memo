@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "flet>=0.28.3",
+    "psutil>=7.0.0",
+    "pywin32>=310",
 ]
 
 [tool.black]
@@ -69,6 +71,7 @@ line-ending = "auto"
 dev = [
     "black>=25.1.0",
     "isort>=6.0.1",
+    "pre-commit>=4.2.0",
     "ruff>=0.12.1",
 ]
 
