@@ -23,6 +23,7 @@ class SettingsManager:
                 "height": 300,
                 "left": None,
                 "top": None,
+                "always_on_top": False,
             },
         }
         self.settings = self.load_settings()
@@ -86,6 +87,15 @@ class SettingsManager:
     def get_window_settings(self):
         """ウィンドウ設定を取得"""
         return self.settings["window"]
+
+    def update_always_on_top_setting(self, always_on_top: bool):
+        """常に最前面設定を更新"""
+        self.settings["window"]["always_on_top"] = always_on_top
+        logger.debug(f"常に最前面設定を更新しました: {always_on_top}")
+
+    def get_always_on_top_setting(self) -> bool:
+        """常に最前面設定を取得"""
+        return self.settings["window"].get("always_on_top", False)
 
     def get_data_save_dir(self):
         """データ保存ディレクトリを取得"""

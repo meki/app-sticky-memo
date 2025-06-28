@@ -281,7 +281,24 @@ def main(page: ft.Page):
     )
 
     # ヘッダーコンポーネントを初期化
-    header = HeaderComponent(on_settings_click_callback=toggle_settings_panel)
+    def on_always_on_top_toggle(is_enabled: bool):
+        """常に最前面設定の切り替え"""
+        try:
+            page.window.always_on_top = is_enabled
+            settings_manager.update_always_on_top_setting(is_enabled)
+            settings_manager.save_settings()
+            logger.info(f"常に最前面設定を変更しました: {is_enabled}")
+
+            # UI更新
+            if not is_shutting_down():
+                page.update()
+        except Exception as e:
+            logger.error(f"常に最前面設定変更エラー: {e}")
+
+    header = HeaderComponent(
+        on_settings_click_callback=toggle_settings_panel,
+        on_always_on_top_callback=on_always_on_top_toggle,
+    )
 
     # フォアグラウンド監視のコールバック関数
     def on_app_change(app_name):
@@ -370,6 +387,12 @@ def main(page: ft.Page):
         if window_settings["left"] is not None and window_settings["top"] is not None:
             page.window.left = window_settings["left"]
             page.window.top = window_settings["top"]
+
+        # 常に最前面設定を適用
+        always_on_top = settings_manager.get_always_on_top_setting()
+        page.window.always_on_top = always_on_top
+        header.set_always_on_top_state(always_on_top)
+        logger.debug(f"常に最前面設定を適用しました: {always_on_top}")
 
         try:
             if not is_shutting_down():
