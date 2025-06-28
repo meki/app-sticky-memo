@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 
 import flet as ft
 
@@ -7,8 +8,10 @@ from src.components.app_display import AppDisplayComponent
 
 # 新しいコンポーネントとコアロジックのインポート
 from src.components.header import HeaderComponent
+from src.components.memo_editor import MemoEditor
 from src.components.settings_panel import SettingsPanel
 from src.core.foreground_monitor import ForegroundMonitor
+from src.core.memo_manager import MemoManager
 from src.core.settings_manager import SettingsManager
 
 # カスタムロガーの設定
@@ -32,7 +35,8 @@ logger.addHandler(console_handler)
 def main(page: ft.Page):
     logger.info("App Sticky Memo を開始します")
     page.title = "App Sticky Memo"
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.vertical_alignment = ft.MainAxisAlignment.START
+    page.padding = ft.padding.all(10)
 
     # アプリケーション終了フラグ（グローバル変数として参照を保持）
     _shutdown_event = threading.Event()
@@ -86,6 +90,10 @@ def main(page: ft.Page):
             return
 
         try:
+            # 現在のメモを保存（終了時）
+            if is_shutting_down():
+                save_current_memo()
+
             # 現在のウィンドウの位置とサイズを取得
             current_width = page.window.width
             current_height = page.window.height
@@ -135,6 +143,50 @@ def main(page: ft.Page):
 
     # UIコンポーネントを初期化
     app_display = AppDisplayComponent()
+
+    # メモマネージャーを初期化
+    memo_manager = MemoManager(settings_manager.get_data_save_dir())
+
+    # メモエディターを初期化
+
+    def on_memo_content_change(content):
+        """メモ内容変更時のコールバック"""
+
+        # 単純に2秒後に自動保存を実行
+        def delayed_save():
+            time.sleep(2)  # 2秒待機
+            if not is_shutting_down() and memo_editor:
+                try:
+                    memo_editor.auto_save()
+                    # UI更新
+                    if not is_shutting_down():
+                        page.update()
+                except Exception as ex:
+                    logger.error(f"自動保存UI更新エラー: {ex}")
+
+        # 既存のタイマーがあれば停止
+        if (
+            hasattr(on_memo_content_change, "_save_timer")
+            and on_memo_content_change._save_timer
+        ):
+            on_memo_content_change._save_timer.cancel()
+
+        # 新しいタイマーを開始
+        on_memo_content_change._save_timer = threading.Timer(2.0, delayed_save)
+        on_memo_content_change._save_timer.daemon = True
+        on_memo_content_change._save_timer.start()
+
+    memo_editor = MemoEditor(on_content_change=on_memo_content_change)
+
+    # メモ保存用の共通関数
+    def save_current_memo():
+        """現在のメモを保存"""
+        try:
+            if memo_editor.has_unsaved_changes():
+                memo_editor.save_memo()
+                logger.debug("現在のメモを保存しました")
+        except Exception as e:
+            logger.error(f"メモ保存エラー: {e}")
 
     # 設定パネルの状態管理
     settings_panel_visible = False
@@ -188,6 +240,8 @@ def main(page: ft.Page):
             if ensure_data_dir(new_data_dir):
                 settings_manager.update_setting("data_save_dir", new_data_dir)
                 settings_manager.save_settings()
+                # メモマネージャーのデータディレクトリも更新
+                memo_manager.update_data_dir(new_data_dir)
                 # SnackBarの表示
                 page.snack_bar = ft.SnackBar(content=ft.Text("設定を保存しました"))
                 page.snack_bar.open = True
@@ -232,7 +286,23 @@ def main(page: ft.Page):
     # フォアグラウンド監視のコールバック関数
     def on_app_change(app_name):
         """アプリ変更時のコールバック"""
-        app_display.update_app_name(app_name)
+        if app_name:
+            # 現在のメモを保存してから新しいメモを読み込み
+            save_current_memo()
+
+            # 実際のアプリ変更時のみ処理
+            app_display.update_app_name(app_name)
+            # メモファイルを作成/読み込み
+            try:
+                memo_file = memo_manager.get_memo_file_path(app_name)
+                if not memo_file.exists():
+                    memo_manager.create_memo_file(app_name)
+                memo_editor.load_memo(memo_file, app_name)
+                logger.debug(f"メモを読み込みました: {app_name}")
+            except Exception as e:
+                logger.error(f"メモ読み込みエラー: {e}")
+        # Sticky Memoにフォーカスした場合は何もしない
+        # （表示・メモ共に直前の状態を保持）
 
     def on_ui_update():
         """UI更新のコールバック"""
@@ -253,15 +323,38 @@ def main(page: ft.Page):
     # バックグラウンドで監視を開始
     foreground_monitor.start_monitoring()
 
+    # 初期状態で現在のアプリをチェックしてメモを読み込み
+
+    def initial_app_check():
+        """初期状態でのアプリチェック"""
+        from src.core.foreground_monitor import get_foreground_app
+
+        time.sleep(0.5)  # 少し待機してから実行
+        if not is_shutting_down():
+            try:
+                current_app = get_foreground_app()
+                if current_app:
+                    logger.debug(f"初期アプリを検出しました: {current_app}")
+                    on_app_change(current_app)
+                    if not is_shutting_down():
+                        page.update()
+            except Exception as e:
+                logger.error(f"初期アプリチェックエラー: {e}")
+
+    # 初期アプリチェックを別スレッドで実行
+    threading.Thread(target=initial_app_check, daemon=True).start()
+
     logger.debug("UIを構築します")
     main_content = ft.Column(
         [
             header.get_component(),
             app_display.get_component(),
+            memo_editor.get_component(),  # メモエディターを追加
             settings_panel.get_component(),  # 設定パネルを追加
         ],
-        alignment=ft.MainAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.START,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        expand=True,
     )
 
     page.add(main_content)

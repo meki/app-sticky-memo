@@ -77,6 +77,7 @@ class ForegroundMonitor:
         self.on_ui_update_callback = on_ui_update_callback
         self.monitor_thread = None
         self.last_app = None
+        self.previous_non_sticky_app = None  # 直前の非Sticky Memoアプリを記憶
         logger.debug("ForegroundMonitorを初期化しました")
 
     def start_monitoring(self):
@@ -106,8 +107,9 @@ class ForegroundMonitor:
                     and app_name != self.last_app
                     and not self.shutdown_event.is_set()
                 ):
-                    # アプリ変更時の処理
+                    # 実際のアプリ変更時の処理
                     self._handle_app_change(app_name)
+                    self.previous_non_sticky_app = app_name  # 直前の非Sticky Memoアプリ
                     self.last_app = app_name
 
                 elif (
@@ -116,7 +118,7 @@ class ForegroundMonitor:
                     and not self.shutdown_event.is_set()
                 ):
                     # app-sticky-memo自体にフォーカスした場合
-                    self._handle_app_focus_self()
+                    # 何もしない（表示もメモも直前のアプリのものを保持）
                     self.last_app = None
 
                 if not self.shutdown_event.is_set():
@@ -146,38 +148,3 @@ class ForegroundMonitor:
                 logger.error(f"UI更新エラー: {update_ex}")
                 if self.shutdown_event.is_set():
                     return
-
-        # メモファイルを作成/更新
-        self._create_memo_file(app_name)
-
-    def _handle_app_focus_self(self):
-        """App Sticky Memo自体にフォーカスした場合の処理"""
-        logger.debug("App Sticky Memoにフォーカスしました")
-
-        # コールバック関数でUI更新
-        if self.on_app_change_callback:
-            self.on_app_change_callback(None)
-
-        # UI更新を安全に実行
-        if self.on_ui_update_callback:
-            try:
-                if not self.shutdown_event.is_set():
-                    self.on_ui_update_callback()
-            except Exception as update_ex:
-                logger.error(f"UI更新エラー: {update_ex}")
-
-    def _create_memo_file(self, app_name):
-        """メモファイルを作成"""
-        data_dir = self.settings["data_save_dir"]
-        if ensure_data_dir(data_dir) and not self.shutdown_event.is_set():
-            memo_file = get_memo_file_path(app_name, data_dir)
-            if not memo_file.exists():
-                try:
-                    with open(memo_file, "w", encoding="utf-8") as f:
-                        f.write(f"# {app_name} のメモ\n\n")
-                        f.write("ここにメモを記述してください。\n\n")
-                        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write(f"作成日時: {timestamp}\n")
-                    logger.debug(f"メモファイルを作成しました: {memo_file}")
-                except Exception as e:
-                    logger.error(f"メモファイル作成エラー: {e}")
