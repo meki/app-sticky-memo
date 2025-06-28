@@ -1,1 +1,2 @@
 - Please use uv package manager
+- Please check code quality by using `uv run pre-commit run --all-files`
