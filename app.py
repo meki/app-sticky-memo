@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from pathlib import Path
 
@@ -6,6 +7,23 @@ import flet as ft
 import psutil
 import win32gui
 import win32process
+
+# カスタムロガーの設定
+logger = logging.getLogger("app_sticky_memo")
+logger.setLevel(logging.DEBUG)
+
+# コンソールハンドラーの設定
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# フォーマッターの設定
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%H:%M:%S"
+)
+console_handler.setFormatter(formatter)
+
+# ハンドラーをロガーに追加
+logger.addHandler(console_handler)
 
 
 def get_foreground_app():
@@ -69,8 +87,9 @@ def save_settings(settings):
     try:
         with open("settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f, ensure_ascii=False, indent=2)
+        logger.debug("設定ファイルを保存しました")
     except Exception as e:
-        print(f"設定保存エラー: {e}")
+        logger.error(f"設定保存エラー: {e}")
 
 
 def ensure_data_dir(data_dir):
@@ -92,7 +111,7 @@ def get_memo_file_path(app_name, data_dir):
 
 
 def main(page: ft.Page):
-    print("App Sticky Memo を開始します")
+    logger.info("App Sticky Memo を開始します")
     page.title = "App Sticky Memo"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
@@ -106,46 +125,46 @@ def main(page: ft.Page):
 
     def set_shutdown():
         _shutdown_event.set()
-        print("アプリケーション終了フラグを設定しました")
+        logger.info("アプリケーション終了フラグを設定しました")
 
     # 設定を読み込み
     settings = load_settings()
-    print(f"設定を読み込みました: {settings}")
+    logger.debug(f"設定を読み込みました: {settings}")
 
     # ウィンドウの位置とサイズを復元
     window_settings = settings["window"]
-    print(f"ウィンドウ設定を復元します: {window_settings}")
+    logger.debug(f"ウィンドウ設定を復元します: {window_settings}")
 
     page.window.width = window_settings["width"]
     page.window.height = window_settings["height"]
     width, height = window_settings["width"], window_settings["height"]
-    print(f"ウィンドウサイズを設定しました: {width} x {height}")
+    logger.info(f"ウィンドウサイズを設定しました: {width} x {height}")
 
     if window_settings["left"] is not None and window_settings["top"] is not None:
         page.window.left = window_settings["left"]
         page.window.top = window_settings["top"]
         left, top = window_settings["left"], window_settings["top"]
-        print(f"ウィンドウ位置を設定しました: ({left}, {top})")
+        logger.info(f"ウィンドウ位置を設定しました: ({left}, {top})")
     else:
-        print("ウィンドウ位置の設定がありません（初回起動）")
+        logger.info("ウィンドウ位置の設定がありません（初回起動）")
 
     # ウィンドウが閉じられる時の処理
     def on_window_event(e):
-        print(f"ウィンドウイベントが発生しました: {e.data}")
+        logger.debug(f"ウィンドウイベントが発生しました: {e.data}")
 
         if e.data == "close":
-            print("ウィンドウが閉じられます - 設定を保存します")
+            logger.info("ウィンドウが閉じられます - 設定を保存します")
             set_shutdown()
             save_window_settings()
         elif e.data in ["moved", "resized"] and not is_shutting_down():
-            print("ウィンドウの位置またはサイズが変更されました")
+            logger.debug("ウィンドウの位置またはサイズが変更されました")
             # 直接保存（遅延なし）
             save_window_settings()
 
     def save_window_settings():
         """ウィンドウ設定を保存する共通関数"""
         if is_shutting_down():
-            print("アプリ終了中のため、ウィンドウ設定保存をスキップします")
+            logger.debug("アプリ終了中のため、ウィンドウ設定保存をスキップします")
             return
 
         try:
@@ -155,9 +174,9 @@ def main(page: ft.Page):
             current_left = page.window.left
             current_top = page.window.top
 
-            print("現在のウィンドウ情報:")
-            print(f"  サイズ: {current_width} x {current_height}")
-            print(f"  位置: ({current_left}, {current_top})")
+            logger.debug("現在のウィンドウ情報:")
+            logger.debug(f"  サイズ: {current_width} x {current_height}")
+            logger.debug(f"  位置: ({current_left}, {current_top})")
 
             # 設定を更新
             settings["window"]["width"] = current_width
@@ -167,9 +186,9 @@ def main(page: ft.Page):
 
             # 設定を保存
             save_settings(settings)
-            print(f"ウィンドウ設定を保存しました: {settings['window']}")
+            logger.debug(f"ウィンドウ設定を保存しました: {settings['window']}")
         except Exception as ex:
-            print(f"ウィンドウ設定保存でエラー: {ex}")
+            logger.error(f"ウィンドウ設定保存でエラー: {ex}")
             # エラーが発生した場合は終了フラグをチェックして、必要に応じて処理を停止
             if is_shutting_down():
                 return
@@ -180,7 +199,7 @@ def main(page: ft.Page):
             return
 
         width, height = page.window.width, page.window.height
-        print(f"リサイズイベント: {width} x {height}")
+        logger.debug(f"リサイズイベント: {width} x {height}")
 
         # リサイズ後に直接設定を保存（遅延なし）
         save_window_settings()
@@ -190,7 +209,7 @@ def main(page: ft.Page):
 
     # ページが切断される時の処理（バックアップとして）
     def on_disconnect(e):
-        print("ページが切断されました - 設定を保存します")
+        logger.info("ページが切断されました - 設定を保存します")
         set_shutdown()
         save_window_settings()
 
@@ -207,7 +226,7 @@ def main(page: ft.Page):
     # ファイルピッカーを事前に初期化
     file_picker = ft.FilePicker()
     page.overlay.append(file_picker)
-    print("ファイルピッカーを初期化しました")
+    logger.debug("ファイルピッカーを初期化しました")
 
     # 設定パネルの状態管理
     settings_panel_visible = False
@@ -221,13 +240,13 @@ def main(page: ft.Page):
             return
         nonlocal settings_panel_visible
         settings_panel_visible = not settings_panel_visible
-        print(f"設定パネルの表示状態: {settings_panel_visible}")
+        logger.debug(f"設定パネルの表示状態: {settings_panel_visible}")
         settings_panel.visible = settings_panel_visible
         try:
             if not is_shutting_down():
                 page.update()
         except Exception as ex:
-            print(f"設定パネル更新エラー: {ex}")
+            logger.error(f"設定パネル更新エラー: {ex}")
 
     # 設定パネルのコンポーネント
     data_dir_field = ft.TextField(
@@ -238,17 +257,17 @@ def main(page: ft.Page):
     )
 
     def pick_directory(e):
-        print("フォルダ選択ボタンがクリックされました")
+        logger.debug("フォルダ選択ボタンがクリックされました")
 
         def on_result(result: ft.FilePickerResultEvent):
-            print(f"フォルダ選択結果: {result.path}")
+            logger.debug(f"フォルダ選択結果: {result.path}")
             if result.path and not is_shutting_down():
                 data_dir_field.value = result.path
                 try:
                     if not is_shutting_down():
                         page.update()
                 except Exception as ex:
-                    print(f"フォルダ選択更新エラー: {ex}")
+                    logger.error(f"フォルダ選択更新エラー: {ex}")
 
         file_picker.on_result = on_result
         file_picker.get_directory_path("フォルダを選択してください")
@@ -256,7 +275,7 @@ def main(page: ft.Page):
     def save_settings_action(e):
         if is_shutting_down():
             return
-        print("設定保存ボタンがクリックされました")
+        logger.debug("設定保存ボタンがクリックされました")
         new_dir = data_dir_field.value.strip()
         if new_dir and new_dir != "":
             if ensure_data_dir(new_dir):
@@ -269,8 +288,8 @@ def main(page: ft.Page):
                     if not is_shutting_down():
                         page.update()
                 except Exception as ex:
-                    print(f"設定保存更新エラー: {ex}")
-                print(f"設定を保存しました: {new_dir}")
+                    logger.error(f"設定保存更新エラー: {ex}")
+                logger.info(f"設定を保存しました: {new_dir}")
                 toggle_settings_panel()  # 設定パネルを閉じる
             else:
                 page.snack_bar = ft.SnackBar(content=ft.Text("無効なディレクトリです"))
@@ -279,8 +298,8 @@ def main(page: ft.Page):
                     if not is_shutting_down():
                         page.update()
                 except Exception as ex:
-                    print(f"エラー表示更新エラー: {ex}")
-                print(f"無効なディレクトリです: {new_dir}")
+                    logger.error(f"エラー表示更新エラー: {ex}")
+                logger.error(f"無効なディレクトリです: {new_dir}")
         else:
             snack_text = "ディレクトリを入力してください"
             page.snack_bar = ft.SnackBar(content=ft.Text(snack_text))
@@ -289,20 +308,20 @@ def main(page: ft.Page):
                 if not is_shutting_down():
                     page.update()
             except Exception as ex:
-                print(f"エラー表示更新エラー: {ex}")
-            print("ディレクトリが入力されていません")
+                logger.error(f"エラー表示更新エラー: {ex}")
+            logger.error("ディレクトリが入力されていません")
 
     def cancel_settings_action(e):
         if is_shutting_down():
             return
-        print("設定キャンセルボタンがクリックされました")
+        logger.debug("設定キャンセルボタンがクリックされました")
         # 元の値に戻す
         data_dir_field.value = settings["data_save_dir"]
         try:
             if not is_shutting_down():
                 page.update()
         except Exception as ex:
-            print(f"キャンセル更新エラー: {ex}")
+            logger.error(f"キャンセル更新エラー: {ex}")
         toggle_settings_panel()  # 設定パネルを閉じる
 
     # 設定パネル
@@ -355,7 +374,7 @@ def main(page: ft.Page):
 
     # 設定ボタン
     def on_settings_click(e):
-        print("設定ボタンがクリックされました")
+        logger.debug("設定ボタンがクリックされました")
         toggle_settings_panel()
 
     settings_button = ft.IconButton(
@@ -363,7 +382,7 @@ def main(page: ft.Page):
         tooltip="設定",
         on_click=on_settings_click,
     )
-    print("設定ボタンを作成しました")
+    logger.debug("設定ボタンを作成しました")
 
     # ヘッダー部分
     header = ft.Row(
@@ -412,7 +431,7 @@ def main(page: ft.Page):
                         if not is_shutting_down():
                             page.update()
                     except Exception as update_ex:
-                        print(f"UI更新エラー: {update_ex}")
+                        logger.error(f"UI更新エラー: {update_ex}")
                         if is_shutting_down():
                             break
 
@@ -427,8 +446,9 @@ def main(page: ft.Page):
                                     f.write("ここにメモを記述してください。\n\n")
                                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                                     f.write(f"作成日時: {timestamp}\n")
+                                logger.debug(f"メモファイルを作成しました: {memo_file}")
                             except Exception as e:
-                                print(f"メモファイル作成エラー: {e}")
+                                logger.error(f"メモファイル作成エラー: {e}")
 
                 elif (
                     app_name is None and last_app is not None and not is_shutting_down()
@@ -442,32 +462,32 @@ def main(page: ft.Page):
                         if not is_shutting_down():
                             page.update()
                     except Exception as update_ex:
-                        print(f"UI更新エラー: {update_ex}")
+                        logger.error(f"UI更新エラー: {update_ex}")
                         if is_shutting_down():
                             break
 
                 if not is_shutting_down():
                     time.sleep(0.5)  # 0.5秒間隔で監視
             except Exception as e:
-                print(f"監視エラー: {e}")
+                logger.error(f"監視エラー: {e}")
                 if not is_shutting_down():
                     time.sleep(1)
                 else:
                     break
-        print("フォアグラウンドアプリ監視を終了しました")
+        logger.info("フォアグラウンドアプリ監視を終了しました")
 
     # バックグラウンドで監視を開始
     if not is_shutting_down():
         try:
             monitor_thread = threading.Thread(target=update_foreground_app, daemon=True)
             monitor_thread.start()
-            print("フォアグラウンドアプリ監視を開始しました")
+            logger.info("フォアグラウンドアプリ監視を開始しました")
         except RuntimeError as e:
-            print(f"監視スレッドの開始でエラー: {e}")
+            logger.error(f"監視スレッドの開始でエラー: {e}")
     else:
-        print("アプリ終了中のため、監視スレッドを開始しません")
+        logger.info("アプリ終了中のため、監視スレッドを開始しません")
 
-    print("UIを構築します")
+    logger.debug("UIを構築します")
     main_content = ft.Column(
         [
             header,
@@ -479,11 +499,11 @@ def main(page: ft.Page):
     )
 
     page.add(main_content)
-    print("UIの構築が完了しました")
+    logger.info("UIの構築が完了しました")
 
     # ページロード後に直接ウィンドウ設定を適用
     try:
-        print("ウィンドウ設定を再適用します")
+        logger.debug("ウィンドウ設定を再適用します")
         page.window.width = window_settings["width"]
         page.window.height = window_settings["height"]
 
@@ -495,11 +515,11 @@ def main(page: ft.Page):
             if not is_shutting_down():
                 page.update()
         except Exception as update_ex:
-            print(f"ウィンドウ設定更新エラー: {update_ex}")
-        print("ウィンドウ設定の再適用が完了しました")
+            logger.error(f"ウィンドウ設定更新エラー: {update_ex}")
+        logger.info("ウィンドウ設定の再適用が完了しました")
     except Exception as ex:
-        print(f"ウィンドウ設定の再適用でエラー: {ex}")
+        logger.error(f"ウィンドウ設定の再適用でエラー: {ex}")
 
 
-print("App Sticky Memo を起動します")
+logger.info("App Sticky Memo を起動します")
 ft.app(main)
