@@ -6,14 +6,14 @@ logger = logging.getLogger("app_sticky_memo")
 
 
 class SettingsManager:
-    """設定管理クラス"""
+    """Settings management class"""
 
     def __init__(self, settings_file="settings.json"):
         """
-        SettingsManagerを初期化
+        Initialize SettingsManager
 
         Args:
-            settings_file: 設定ファイル名
+            settings_file: Settings file name
         """
         self.settings_file = Path(settings_file)
         self.default_settings = {
@@ -27,15 +27,15 @@ class SettingsManager:
             },
         }
         self.settings = self.load_settings()
-        logger.debug("SettingsManagerを初期化しました")
+        logger.debug("SettingsManager initialized")
 
     def load_settings(self):
-        """設定ファイルを読み込み"""
+        """Load settings file"""
         if self.settings_file.exists():
             try:
                 with open(self.settings_file, encoding="utf-8") as f:
                     loaded_settings = json.load(f)
-                    # デフォルト設定をベースに、読み込んだ設定をマージ
+                    # Merge loaded settings into default settings
                     merged_settings = self.default_settings.copy()
                     for key, value in loaded_settings.items():
                         if key in merged_settings:
@@ -45,58 +45,58 @@ class SettingsManager:
                                 merged_settings[key].update(value)
                             else:
                                 merged_settings[key] = value
-                    logger.debug(f"設定を読み込みました: {merged_settings}")
+                    logger.debug(f"Settings loaded: {merged_settings}")
                     return merged_settings
             except Exception as e:
-                logger.error(f"設定読み込みエラー: {e}")
+                logger.error(f"Settings load error: {e}")
 
-        logger.debug(f"デフォルト設定を使用します: {self.default_settings}")
+        logger.debug(f"Using default settings: {self.default_settings}")
         return self.default_settings.copy()
 
     def save_settings(self, settings=None):
-        """設定ファイルを保存"""
+        """Save settings file"""
         if settings is not None:
             self.settings = settings
 
         try:
             with open(self.settings_file, "w", encoding="utf-8") as f:
                 json.dump(self.settings, f, ensure_ascii=False, indent=2)
-            logger.debug("設定ファイルを保存しました")
+            logger.debug("Settings file saved")
             return True
         except Exception as e:
-            logger.error(f"設定保存エラー: {e}")
+            logger.error(f"Settings save error: {e}")
             return False
 
     def get_settings(self):
-        """現在の設定を取得"""
+        """Get current settings"""
         return self.settings
 
     def update_setting(self, key, value):
-        """特定の設定を更新"""
+        """Update a specific setting"""
         self.settings[key] = value
-        logger.debug(f"設定を更新しました: {key} = {value}")
+        logger.debug(f"Setting updated: {key} = {value}")
 
     def update_window_settings(self, width, height, left, top):
-        """ウィンドウ設定を更新"""
+        """Update window settings"""
         self.settings["window"]["width"] = width
         self.settings["window"]["height"] = height
         self.settings["window"]["left"] = left
         self.settings["window"]["top"] = top
-        logger.debug(f"ウィンドウ設定を更新しました: {self.settings['window']}")
+        logger.debug(f"Window settings updated: {self.settings['window']}")
 
     def get_window_settings(self):
-        """ウィンドウ設定を取得"""
+        """Get window settings"""
         return self.settings["window"]
 
     def update_always_on_top_setting(self, always_on_top: bool):
-        """常に最前面設定を更新"""
+        """Update always-on-top setting"""
         self.settings["window"]["always_on_top"] = always_on_top
-        logger.debug(f"常に最前面設定を更新しました: {always_on_top}")
+        logger.debug(f"Always-on-top setting updated: {always_on_top}")
 
     def get_always_on_top_setting(self) -> bool:
-        """常に最前面設定を取得"""
+        """Get always-on-top setting"""
         return self.settings["window"].get("always_on_top", False)
 
     def get_data_save_dir(self):
-        """データ保存ディレクトリを取得"""
+        """Get data save directory"""
         return self.settings["data_save_dir"]

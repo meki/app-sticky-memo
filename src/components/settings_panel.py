@@ -6,7 +6,7 @@ from src.locales.i18n import t
 
 
 class SettingsPanel:
-    """設定パネルのUIコンポーネント"""
+    """UI component for the settings panel"""
 
     def __init__(
         self,
@@ -21,7 +21,7 @@ class SettingsPanel:
         self.on_pick_directory = on_pick_directory
         self.visible = False
 
-        # テキストフィールド
+        # Text field
         self.data_dir_field = ft.TextField(
             label=t("settings_panel.data_directory_label"),
             value=initial_data_dir,
@@ -29,11 +29,11 @@ class SettingsPanel:
             multiline=False,
         )
 
-        # パネルコンテナ
+        # Panel container
         self.container = self._create_panel()
 
     def _create_panel(self) -> ft.Container:
-        """設定パネルのコンテナを作成"""
+        """Create the container for the settings panel"""
         return ft.Container(
             content=ft.Column(
                 [
@@ -47,7 +47,7 @@ class SettingsPanel:
                             ft.Container(expand=True),
                             ft.IconButton(
                                 icon=ft.Icons.CLOSE,
-                                tooltip="閉じる",
+                                tooltip="Close",
                                 on_click=self._on_cancel_click,
                             ),
                         ]
@@ -88,48 +88,48 @@ class SettingsPanel:
             border_radius=ft.border_radius.all(10),
             border=ft.border.all(2, ft.Colors.BLUE_GREY_200),
             margin=ft.margin.all(10),
-            visible=False,  # 初期状態は非表示
+            visible=False,  # Initially hidden
         )
 
     def _on_save_click(self, e):
-        """保存ボタンクリック時の処理"""
+        """Handle save button click"""
         self.on_save(self.data_dir_field.value.strip())
 
     def _on_cancel_click(self, e):
-        """キャンセルボタンクリック時の処理"""
+        """Handle cancel button click"""
         self.data_dir_field.value = self.initial_data_dir
         self.on_cancel()
 
     def _on_pick_directory_click(self, e):
-        """フォルダ選択ボタンクリック時の処理"""
+        """Handle folder select button click"""
         self.on_pick_directory()
 
     def show(self):
-        """パネルを表示"""
+        """Show the panel"""
         self.visible = True
         self.container.visible = True
 
     def hide(self):
-        """パネルを非表示"""
+        """Hide the panel"""
         self.visible = False
         self.container.visible = False
 
     def toggle(self):
-        """パネルの表示/非表示を切り替え"""
+        """Toggle panel visibility"""
         if self.visible:
             self.hide()
         else:
             self.show()
 
     def update_data_dir(self, new_dir: str):
-        """データディレクトリフィールドを更新"""
+        """Update the data directory field"""
         self.data_dir_field.value = new_dir
         self.initial_data_dir = new_dir
 
     def get_data_dir(self) -> str:
-        """現在のデータディレクトリ値を取得"""
+        """Get the current data directory value"""
         return self.data_dir_field.value.strip()
 
     def get_component(self) -> ft.Container:
-        """設定パネルのコンポーネントを取得"""
+        """Get the settings panel component"""
         return self.container

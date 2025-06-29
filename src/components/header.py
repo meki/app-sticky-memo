@@ -8,46 +8,46 @@ logger = logging.getLogger("app_sticky_memo")
 
 
 class HeaderComponent:
-    """アプリのヘッダー部分を管理するコンポーネント"""
+    """Component managing the app header section"""
 
     def __init__(self, on_settings_click_callback=None, on_always_on_top_callback=None):
         """
-        HeaderComponentを初期化
+        Initialize HeaderComponent
 
         Args:
-            on_settings_click_callback: 設定ボタンクリック時のコールバック関数
-            on_always_on_top_callback: 常に最前面チェックボックス変更時のコールバック
+            on_settings_click_callback: Callback for settings button click
+            on_always_on_top_callback: Callback for always-on-top checkbox change
         """
         self.on_settings_click_callback = on_settings_click_callback
         self.on_always_on_top_callback = on_always_on_top_callback
         self._create_components()
-        logger.debug("HeaderComponentを初期化しました")
+        logger.debug("HeaderComponent initialized")
 
     def _create_components(self):
-        """ヘッダーコンポーネントを作成"""
-        # 常に最前面チェックボックス
+        """Create header components"""
+        # Always-on-top checkbox
         self.always_on_top_checkbox = ft.Checkbox(
             label=t("header.always_on_top_label"),
             value=False,
             on_change=self._on_always_on_top_change,
         )
 
-        # 設定ボタン
+        # Settings button
         self.settings_button = ft.IconButton(
             icon=ft.Icons.SETTINGS,
             tooltip=t("header.settings_tooltip"),
             on_click=self._on_settings_click,
         )
 
-        # ヘッダー全体
+        # Header row
         self.header = ft.Row(
             [
-                # 左側：常に最前面チェックボックス
+                # Left: Always-on-top checkbox
                 ft.Container(
                     content=self.always_on_top_checkbox,
-                    width=120,  # チェックボックスの幅を固定
+                    width=120,  # Fixed width for checkbox
                 ),
-                # 中央：タイトル
+                # Center: Title
                 ft.Container(
                     content=ft.Text(
                         t("app.title"),
@@ -58,35 +58,35 @@ class HeaderComponent:
                     expand=True,
                     alignment=ft.alignment.center,
                 ),
-                # 右側：設定ボタン
+                # Right: Settings button
                 ft.Container(
                     content=self.settings_button,
-                    width=48,  # ボタンの幅を固定
+                    width=48,  # Fixed width for button
                 ),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
-        logger.debug("ヘッダーコンポーネントを作成しました")
+        logger.debug("Header components created")
 
     def _on_always_on_top_change(self, e):
-        """常に最前面チェックボックス変更時の処理"""
+        """Handle always-on-top checkbox change"""
         is_checked = e.control.value
-        logger.debug(f"常に最前面チェックボックスが変更されました: {is_checked}")
+        logger.debug(f"Always-on-top checkbox changed: {is_checked}")
         if self.on_always_on_top_callback:
             self.on_always_on_top_callback(is_checked)
 
     def set_always_on_top_state(self, is_on_top: bool):
-        """常に最前面チェックボックスの状態を設定"""
+        """Set always-on-top checkbox state"""
         if self.always_on_top_checkbox:
             self.always_on_top_checkbox.value = is_on_top
-            logger.debug(f"常に最前面チェックボックスの状態を設定: {is_on_top}")
+            logger.debug(f"Always-on-top checkbox state set: {is_on_top}")
 
     def _on_settings_click(self, e):
-        """設定ボタンクリック時の処理"""
-        logger.debug("設定ボタンがクリックされました")
+        """Handle settings button click"""
+        logger.debug("Settings button clicked")
         if self.on_settings_click_callback:
             self.on_settings_click_callback()
 
     def get_component(self):
-        """ヘッダーコンポーネントを取得"""
+        """Get the header component"""
         return self.header

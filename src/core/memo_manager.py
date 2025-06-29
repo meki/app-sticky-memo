@@ -8,40 +8,40 @@ logger = logging.getLogger("app_sticky_memo")
 
 
 class MemoManager:
-    """メモファイル管理クラス"""
+    """Memo file management class"""
 
     def __init__(self, data_dir: str):
         """
-        MemoManagerを初期化
+        Initialize MemoManager
 
         Args:
-            data_dir: メモファイルの保存ディレクトリ
+            data_dir: Directory for saving memo files
         """
         self.data_dir = Path(data_dir)
         self.mapping_file = self.data_dir / "mapping.yaml"
         self.mapping = {}
         self.ensure_data_dir()
         self.load_mapping()
-        logger.debug(f"MemoManagerを初期化しました: {self.data_dir}")
+        logger.debug(f"MemoManager initialized: {self.data_dir}")
 
     def ensure_data_dir(self) -> bool:
-        """データディレクトリを作成"""
+        """Create data directory"""
         try:
             self.data_dir.mkdir(parents=True, exist_ok=True)
             return True
         except Exception as e:
-            logger.error(f"データディレクトリ作成エラー: {e}")
+            logger.error(f"Data directory creation error: {e}")
             return False
 
     def get_memo_file_path(self, exe_name: str) -> Path:
         """
-        exe名からメモファイルのパスを生成
+        Generate memo file path from exe name
 
         Args:
-            exe_name: 実行可能ファイル名
+            exe_name: Executable file name
 
         Returns:
-            メモファイルのパス
+            Path to memo file
         """
         memo_name = self.get_memo_name(exe_name)
         safe_memo_name = self._sanitize_filename(memo_name)
@@ -49,23 +49,23 @@ class MemoManager:
 
     def _sanitize_filename(self, filename: str) -> str:
         """
-        ファイル名として安全な文字列に変換
+        Convert to safe filename string
 
         Args:
-            filename: 元のファイル名
+            filename: Original filename
 
         Returns:
-            安全なファイル名
+            Safe filename
         """
-        # 使用可能な文字のみを抽出
+        # Extract only usable characters
         safe_chars = "".join(
             c for c in filename if c.isalnum() or c in (" ", "-", "_")
         ).rstrip()
 
-        # スペースをアンダースコアに置換
+        # Replace spaces with underscores
         safe_chars = safe_chars.replace(" ", "_")
 
-        # 空文字列の場合のフォールバック
+        # Fallback for empty string
         if not safe_chars:
             safe_chars = "unknown_app"
 
@@ -73,14 +73,14 @@ class MemoManager:
 
     def create_memo_file(self, exe_name: str, content: str | None = None) -> Path:
         """
-        メモファイルを作成
+        Create memo file
 
         Args:
-            exe_name: 実行可能ファイル名
-            content: 初期コンテンツ（Noneの場合はデフォルトテンプレート）
+            exe_name: Executable file name
+            content: Initial content (default template if None)
 
         Returns:
-            作成されたメモファイルのパス
+            Path to created memo file
         """
         memo_file = self.get_memo_file_path(exe_name)
 
@@ -93,89 +93,89 @@ class MemoManager:
                 with open(memo_file, "w", encoding="utf-8") as f:
                     f.write(content)
 
-                logger.debug(f"メモファイルを作成しました: {memo_file}")
+                logger.debug(f"Memo file created: {memo_file}")
             except Exception as e:
-                logger.error(f"メモファイル作成エラー: {e}")
+                logger.error(f"Memo file creation error: {e}")
                 raise
 
         return memo_file
 
     def _create_default_content(self, app_name: str) -> str:
         """
-        デフォルトのメモコンテンツを作成
+        Create default memo content
 
         Args:
-            app_name: アプリケーション名
+            app_name: Application name
 
         Returns:
-            デフォルトコンテンツ
+            Default content
         """
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        return f"""# {app_name} のメモ
+        return f"""# Memo for {app_name}
 
-ここにメモを記述してください。
+Write your notes here.
 
-## メモの使い方
-- このファイルはMarkdown形式で記述できます
-- 見出し、リスト、リンクなどが使用可能です
-- 内容は自動保存されます
+## How to use this memo
+- This file can be written in Markdown format
+- You can use headings, lists, links, etc.
+- Content is saved automatically
 
-## 作成日時
+## Created at
 {timestamp}
 """
 
     def read_memo_file(self, memo_file: Path) -> str:
         """
-        メモファイルを読み込み
+        Read memo file
 
         Args:
-            memo_file: メモファイルのパス
+            memo_file: Path to memo file
 
         Returns:
-            ファイルの内容
+            File content
         """
         try:
             if memo_file.exists():
                 with open(memo_file, encoding="utf-8") as f:
                     return f.read()
             else:
-                logger.warning(f"メモファイルが存在しません: {memo_file}")
+                logger.warning(f"Memo file does not exist: {memo_file}")
                 return ""
         except Exception as e:
-            logger.error(f"メモファイル読み込みエラー: {e}")
-            return f"# エラー\n\nメモファイルの読み込みに失敗しました。\nエラー: {e}"
+            logger.error(f"Memo file read error: {e}")
+            return f"# Error\n\nFailed to read memo file.\nError: {e}"
 
     def save_memo_file(self, memo_file: Path, content: str) -> bool:
         """
-        メモファイルを保存
+        Save memo file
 
         Args:
-            memo_file: メモファイルのパス
-            content: 保存する内容
+            memo_file: Path to memo file
+            content: Content to save
 
         Returns:
-            保存が成功したかどうか
+            Whether save was successful
         """
         try:
-            # ディレクトリが存在しない場合は作成
+            # Create directory if it doesn't exist
             memo_file.parent.mkdir(parents=True, exist_ok=True)
 
             with open(memo_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
-            logger.debug(f"メモファイルを保存しました: {memo_file}")
+            logger.debug(f"Memo file saved: {memo_file}")
             return True
 
         except Exception as e:
-            logger.error(f"メモファイル保存エラー: {e}")
+            logger.error(f"Memo file save error: {e}")
             return False
 
     def list_memo_files(self) -> list[Path]:
         """
-        すべてのメモファイルのリストを取得
+        Get list of all memo files
 
         Returns:
-            メモファイルのパスのリスト
+            List of memo file paths
         """
         try:
             if self.data_dir.exists():
@@ -183,42 +183,42 @@ class MemoManager:
             else:
                 return []
         except Exception as e:
-            logger.error(f"メモファイル一覧取得エラー: {e}")
+            logger.error(f"Memo file list error: {e}")
             return []
 
     def get_app_name_from_file(self, memo_file: Path) -> str:
         """
-        メモファイルのパスからアプリ名を取得
+        Get app name from memo file path
 
         Args:
-            memo_file: メモファイルのパス
+            memo_file: Path to memo file
 
         Returns:
-            アプリケーション名
+            Application name
         """
         return memo_file.stem.replace("_", " ")
 
     def update_data_dir(self, new_data_dir: str):
         """
-        データディレクトリを更新
+        Update data directory
 
         Args:
-            new_data_dir: 新しいデータディレクトリ
+            new_data_dir: New data directory
         """
         self.data_dir = Path(new_data_dir)
         self.mapping_file = self.data_dir / "mapping.yaml"
         self.ensure_data_dir()
         self.load_mapping()
-        logger.info(f"データディレクトリを更新しました: {self.data_dir}")
+        logger.info(f"Data directory updated: {self.data_dir}")
 
     def load_mapping(self):
-        """マッピングファイルを読み込み"""
+        """Load mapping file"""
         try:
             if self.mapping_file.exists():
                 with open(self.mapping_file, encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
                     mappings_list = data.get("mappings", [])
-                    # リスト形式から辞書形式に変換
+                    # Convert from list format to dict format
                     self.mapping = {}
                     for item in mappings_list:
                         if (
@@ -227,18 +227,18 @@ class MemoManager:
                             and "memo_name" in item
                         ):
                             self.mapping[item["exe_name"]] = item["memo_name"]
-                logger.debug(f"マッピング読み込み完了: {len(self.mapping)} 項目")
+                logger.debug(f"Mapping loaded: {len(self.mapping)} items")
             else:
                 self.mapping = {}
-                logger.debug("マッピングファイルが存在しません - 空で開始")
+                logger.debug("Mapping file does not exist - starting empty")
         except Exception as e:
-            logger.error(f"マッピングファイル読み込みエラー: {e}")
+            logger.error(f"Mapping file load error: {e}")
             self.mapping = {}
 
     def save_mapping(self):
-        """マッピングファイルを保存"""
+        """Save mapping file"""
         try:
-            # 辞書形式からリスト形式に変換
+            # Convert from dict format to list format
             mappings_list = []
             for exe_name, memo_name in self.mapping.items():
                 mappings_list.append({"exe_name": exe_name, "memo_name": memo_name})
@@ -257,19 +257,19 @@ class MemoManager:
                     indent=2,
                     sort_keys=False,
                 )
-            logger.debug(f"マッピングファイルを保存しました: {len(self.mapping)} 項目")
+            logger.debug(f"Mapping file saved: {len(self.mapping)} items")
         except Exception as e:
-            logger.error(f"マッピングファイル保存エラー: {e}")
+            logger.error(f"Mapping file save error: {e}")
 
     def _remove_extension(self, filename: str) -> str:
         """
-        ファイル名から拡張子を除去
+        Remove extension from filename
 
         Args:
-            filename: 元のファイル名
+            filename: Original filename
 
         Returns:
-            拡張子を除いたファイル名
+            Filename without extension
         """
         if filename.lower().endswith(".exe"):
             return filename[:-4]
@@ -277,39 +277,39 @@ class MemoManager:
 
     def get_memo_name(self, exe_name: str) -> str:
         """
-        exe名からmemo名を取得
+        Get memo name from exe name
 
         Args:
-            exe_name: 実行可能ファイル名
+            exe_name: Executable file name
 
         Returns:
-            対応するmemo名
+            Corresponding memo name
         """
-        # マッピングに存在する場合はそれを使用
+        # Use existing mapping if available
         if exe_name in self.mapping:
             memo_name = self.mapping[exe_name]
-            logger.debug(f"マッピング使用: {exe_name} -> {memo_name}")
+            logger.debug(f"Using mapping: {exe_name} -> {memo_name}")
             return memo_name
 
-        # マッピングに存在しない場合は自動作成（拡張子を除く）
+        # Auto-create mapping if not found (removing extension)
         base_name = self._remove_extension(exe_name)
         self.mapping[exe_name] = base_name
         self.save_mapping()
-        logger.debug(f"新しいマッピング作成: {exe_name} -> {base_name}")
+        logger.debug(f"New mapping created: {exe_name} -> {base_name}")
         return base_name
 
     def update_mapping(self, exe_name: str, memo_name: str):
         """
-        マッピングを更新
+        Update mapping
 
         Args:
-            exe_name: 実行可能ファイル名
-            memo_name: 対応するmemo名
+            exe_name: Executable file name
+            memo_name: Corresponding memo name
         """
         self.mapping[exe_name] = memo_name
         self.save_mapping()
-        logger.info(f"マッピングを更新しました: {exe_name} -> {memo_name}")
+        logger.info(f"Mapping updated: {exe_name} -> {memo_name}")
 
     def get_all_mappings(self) -> dict[str, str]:
-        """全てのマッピングを取得"""
+        """Get all mappings"""
         return self.mapping.copy()

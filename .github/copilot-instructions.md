@@ -1,3 +1,4 @@
 - Please use uv package manager.
 - Please check code quality by using `uv run pre-commit run --all-files`.
 - If you add new features, please update the documentation in `docs/Readme.md` and `docs/Readme.ja.md`.
+- Use English for code comments and debug logs.

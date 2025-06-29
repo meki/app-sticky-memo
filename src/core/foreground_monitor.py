@@ -11,21 +11,21 @@ logger = logging.getLogger("app_sticky_memo")
 
 
 def get_foreground_app():
-    """フォアグラウンドアプリの実行ファイル名を取得"""
+    """Get the executable file name of the foreground app"""
     try:
-        # フォアグラウンドウィンドウのハンドルを取得
+        # Get handle of the foreground window
         hwnd = win32gui.GetForegroundWindow()
         if hwnd == 0:
             return None
 
-        # プロセスIDを取得
+        # Get process ID
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
 
-        # プロセス情報を取得
+        # Get process info
         process = psutil.Process(pid)
         exe_name = process.name()
 
-        # app-sticky-memo自体の場合は除外
+        # Exclude app-sticky-memo itself
         if exe_name in ["python.exe", "pythonw.exe", "app.py", "flet.exe"]:
             return None
 
@@ -35,7 +35,7 @@ def get_foreground_app():
 
 
 def ensure_data_dir(data_dir):
-    """データディレクトリを作成"""
+    """Create data directory"""
     try:
         Path(data_dir).mkdir(parents=True, exist_ok=True)
         return True
@@ -44,7 +44,7 @@ def ensure_data_dir(data_dir):
 
 
 def get_memo_file_path(app_name, data_dir):
-    """アプリ名からメモファイルのパスを生成"""
+    """Generate memo file path from app name"""
     safe_app_name = "".join(
         c for c in app_name if c.isalnum() or c in (" ", "-", "_")
     ).rstrip()
@@ -53,7 +53,7 @@ def get_memo_file_path(app_name, data_dir):
 
 
 class ForegroundMonitor:
-    """フォアグラウンドアプリケーション監視クラス"""
+    """Foreground application monitor class"""
 
     def __init__(
         self,
@@ -63,13 +63,13 @@ class ForegroundMonitor:
         on_ui_update_callback=None,
     ):
         """
-        ForegroundMonitorを初期化
+        Initialize ForegroundMonitor
 
         Args:
-            settings: アプリケーション設定
-            shutdown_event: 終了イベント
-            on_app_change_callback: アプリ変更時のコールバック関数
-            on_ui_update_callback: UI更新時のコールバック関数
+            settings: Application settings
+            shutdown_event: Shutdown event
+            on_app_change_callback: Callback function on app change
+            on_ui_update_callback: Callback function for UI update
         """
         self.settings = settings
         self.shutdown_event = shutdown_event
@@ -77,25 +77,25 @@ class ForegroundMonitor:
         self.on_ui_update_callback = on_ui_update_callback
         self.monitor_thread = None
         self.last_app = None
-        self.previous_non_sticky_app = None  # 直前の非Sticky Memoアプリを記憶
-        logger.debug("ForegroundMonitorを初期化しました")
+        self.previous_non_sticky_app = None  # Remember previous non-Sticky Memo app
+        logger.debug("ForegroundMonitor initialized")
 
     def start_monitoring(self):
-        """監視を開始"""
+        """Start monitoring"""
         if not self.shutdown_event.is_set():
             try:
                 self.monitor_thread = threading.Thread(
                     target=self._monitor_loop, daemon=True
                 )
                 self.monitor_thread.start()
-                logger.info("フォアグラウンドアプリ監視を開始しました")
+                logger.info("Started foreground app monitoring")
             except RuntimeError as e:
-                logger.error(f"監視スレッドの開始でエラー: {e}")
+                logger.error(f"Error starting monitor thread: {e}")
         else:
-            logger.info("アプリ終了中のため、監視スレッドを開始しません")
+            logger.info("Shutdown in progress, not starting monitor thread")
 
     def _monitor_loop(self):
-        """フォアグラウンドアプリを定期的に監視"""
+        """Periodically monitor the foreground app"""
         while not self.shutdown_event.is_set():
             try:
                 if self.shutdown_event.is_set():
@@ -107,9 +107,11 @@ class ForegroundMonitor:
                     and app_name != self.last_app
                     and not self.shutdown_event.is_set()
                 ):
-                    # 実際のアプリ変更時の処理
+                    # Handle actual app change
                     self._handle_app_change(app_name)
-                    self.previous_non_sticky_app = app_name  # 直前の非Sticky Memoアプリ
+                    self.previous_non_sticky_app = (
+                        app_name  # Remember previous non-Sticky Memo app
+                    )
                     self.last_app = app_name
 
                 elif (
@@ -117,34 +119,34 @@ class ForegroundMonitor:
                     and self.last_app is not None
                     and not self.shutdown_event.is_set()
                 ):
-                    # app-sticky-memo自体にフォーカスした場合
-                    # 何もしない（表示もメモも直前のアプリのものを保持）
+                    # When focus is on app-sticky-memo itself
+                    # Do nothing (keep showing previous app's memo)
                     self.last_app = None
 
                 if not self.shutdown_event.is_set():
-                    time.sleep(0.5)  # 0.5秒間隔で監視
+                    time.sleep(0.5)  # Monitor every 0.5 seconds
             except Exception as e:
-                logger.error(f"監視エラー: {e}")
+                logger.error(f"Monitoring error: {e}")
                 if not self.shutdown_event.is_set():
                     time.sleep(1)
                 else:
                     break
-        logger.info("フォアグラウンドアプリ監視を終了しました")
+        logger.info("Foreground app monitoring stopped")
 
     def _handle_app_change(self, app_name):
-        """アプリ変更時の処理"""
-        logger.debug(f"アプリが変更されました: {app_name}")
+        """Handle app change event"""
+        logger.debug(f"App changed: {app_name}")
 
-        # コールバック関数でUI更新
+        # Update UI via callback
         if self.on_app_change_callback:
             self.on_app_change_callback(app_name)
 
-        # UI更新を安全に実行
+        # Safely update UI
         if self.on_ui_update_callback:
             try:
                 if not self.shutdown_event.is_set():
                     self.on_ui_update_callback()
             except Exception as update_ex:
-                logger.error(f"UI更新エラー: {update_ex}")
+                logger.error(f"UI update error: {update_ex}")
                 if self.shutdown_event.is_set():
                     return

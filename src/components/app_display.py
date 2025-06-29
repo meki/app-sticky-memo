@@ -6,22 +6,22 @@ logger = logging.getLogger("app_sticky_memo")
 
 
 class AppDisplayComponent:
-    """現在のアプリ名を表示するコンポーネント"""
+    """Component to display the current app name"""
 
-    def __init__(self, initial_text="アプリを監視中..."):
+    def __init__(self, initial_text="Monitoring app..."):
         """
-        AppDisplayComponentを初期化
+        Initialize AppDisplayComponent
 
         Args:
-            initial_text: 初期表示テキスト
+            initial_text: Initial display text
         """
         self.initial_text = initial_text
         self._create_components()
-        logger.debug("AppDisplayComponentを初期化しました")
+        logger.debug("AppDisplayComponent initialized")
 
     def _create_components(self):
-        """アプリ表示コンポーネントを作成"""
-        # アプリ名表示テキスト
+        """Create app display components"""
+        # App name display text
         self.current_app_text = ft.Text(
             value=self.initial_text,
             size=16,
@@ -29,7 +29,7 @@ class AppDisplayComponent:
             weight=ft.FontWeight.W_500,
         )
 
-        # アプリ名表示用のコンテナ
+        # Container for app name display
         self.app_display_container = ft.Container(
             content=self.current_app_text,
             padding=ft.padding.all(20),
@@ -39,26 +39,26 @@ class AppDisplayComponent:
             margin=ft.margin.all(10),
             border=ft.border.all(1, ft.Colors.BLUE_GREY_200),
         )
-        logger.debug("アプリ表示コンポーネントを作成しました")
+        logger.debug("App display components created")
 
     def update_app_name(self, app_name):
         """
-        表示するアプリ名を更新
+        Update the displayed app name
 
         Args:
-            app_name: 表示するアプリ名
+            app_name: App name to display
         """
         if app_name:
-            self.current_app_text.value = f"現在のアプリ: {app_name}"
-            logger.debug(f"アプリ名を更新しました: {app_name}")
+            self.current_app_text.value = f"Current app: {app_name}"
+            logger.debug(f"App name updated: {app_name}")
         else:
-            self.current_app_text.value = "App Sticky Memo にフォーカス中"
-            logger.debug("App Sticky Memoにフォーカス中の表示に更新しました")
+            self.current_app_text.value = "App Sticky Memo is focused"
+            logger.debug("Updated display to show App Sticky Memo is focused")
 
     def get_component(self):
-        """アプリ表示コンポーネントを取得"""
+        """Get the app display component"""
         return self.app_display_container
 
     def get_text_component(self):
-        """テキストコンポーネント自体を取得（直接参照が必要な場合）"""
+        """Get the text component itself (for direct reference)"""
         return self.current_app_text
