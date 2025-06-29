@@ -8,11 +8,14 @@ header:
 
 memo_editor:
   not_loaded: "メモが読み込まれていません"
-  hint_text: "他のアプリにフォーカスして下さい...\n\nアプリ毎にメモが可能です。"
+  hint_text: "他のアプリにフォーカスして下さい...\n\nアプリ毎にメモが可能です。\n\nMarkdown記法が使用できます:\n# 見出し1\n## 見出し2\n**太字** *斜体*\n- リスト項目\n```\nコードブロック\n```"
   memo_title: "{app_name} のメモ"
   saved_status: "保存しました"
   save_error: "保存エラー: {error}"
   template_header: "# {app_name} のメモ\n\nここにメモを記述してください。\n\n## 作成日時\n{timestamp}\n"
+  edit_tab: "編集"
+  preview_tab: "プレビュー"
+  preview_empty: "*プレビューするコンテンツがありません*"
 
 settings_panel:
   title: "設定"

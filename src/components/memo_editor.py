@@ -35,7 +35,7 @@ class MemoEditor:
             color=ft.Colors.BLUE_GREY_600,
         )
 
-        # Text area
+        # Text area with markdown-friendly settings
         self.text_area = ft.TextField(
             multiline=True,
             expand=True,
@@ -44,6 +44,51 @@ class MemoEditor:
             content_padding=ft.padding.all(15),
             text_size=14,
             on_change=self._on_text_change,
+            # Add monospace font for better markdown editing
+            text_style=ft.TextStyle(font_family="Consolas, 'Courier New', monospace"),
+            # Enable text wrapping
+            min_lines=1,
+            max_lines=None,
+        )
+
+        # Markdown preview
+        self.markdown_preview = ft.Markdown(
+            value="",
+            expand=True,
+            auto_follow_links=False,
+            extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+        )
+
+        # Tab container for edit/preview modes
+        self.tab_container = ft.Tabs(
+            selected_index=0,
+            animation_duration=300,
+            expand=True,
+            tabs=[
+                ft.Tab(
+                    text=t("memo_editor.edit_tab", default="Edit"),
+                    icon=ft.Icons.EDIT,
+                    content=ft.Container(
+                        content=self.text_area,
+                        padding=ft.padding.all(0),
+                        expand=True,
+                    ),
+                ),
+                ft.Tab(
+                    text=t("memo_editor.preview_tab", default="Preview"),
+                    icon=ft.Icons.PREVIEW,
+                    content=ft.Container(
+                        content=ft.Column(
+                            [self.markdown_preview],
+                            expand=True,
+                            scroll=ft.ScrollMode.AUTO,
+                        ),
+                        padding=ft.padding.all(10),
+                        expand=True,
+                    ),
+                ),
+            ],
+            on_change=self._on_tab_change,
         )
 
         # Save status display
@@ -63,7 +108,7 @@ class MemoEditor:
                         ]
                     ),
                     ft.Container(height=10),
-                    self.text_area,
+                    self.tab_container,
                 ],
                 spacing=0,
                 expand=True,
@@ -83,6 +128,33 @@ class MemoEditor:
         self.save_status.visible = False
         if self.on_content_change:
             self.on_content_change(self.text_area.value)
+        # Auto-update preview if on preview tab
+        if hasattr(self, "tab_container") and self.tab_container.selected_index == 1:
+            self._update_markdown_preview()
+            # Force page update if available
+            if hasattr(e, "page") and hasattr(e.page, "update"):
+                e.page.update()
+
+    def _on_tab_change(self, e):
+        """Handle tab change event"""
+        if e.control.selected_index == 1:  # Preview tab
+            self._update_markdown_preview()
+            # Try to update the page if available
+            if hasattr(e.page, "update"):
+                e.page.update()
+
+    def _update_markdown_preview(self):
+        """Update markdown preview with current text content"""
+        content = self.text_area.value if self.text_area.value else ""
+        if content.strip():
+            self.markdown_preview.value = content
+        else:
+            self.markdown_preview.value = t(
+                "memo_editor.preview_empty", default="*No content to preview*"
+            )
+        # Force update the UI
+        if hasattr(self.markdown_preview, "update"):
+            self.markdown_preview.update()
 
     def load_memo(self, file_path: Path, app_name: str):
         """
@@ -114,6 +186,8 @@ class MemoEditor:
 
             self.is_dirty = False
             self.save_status.visible = False
+            # Update markdown preview
+            self._update_markdown_preview()
 
         except Exception as e:
             logger.error(f"Memo file load error: {e}")
@@ -192,4 +266,6 @@ class MemoEditor:
         self.current_file_path = None
         self.is_dirty = False
         self.save_status.visible = False
+        # Clear markdown preview
+        self.markdown_preview.value = ""
         logger.debug("Memo editor cleared")

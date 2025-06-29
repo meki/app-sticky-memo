@@ -8,11 +8,14 @@ header:
 
 memo_editor:
   not_loaded: "No memo loaded"
-  hint_text: "Switch focus on another apps...\n\n.You can create memos for each app."
+  hint_text: "Switch focus on another apps...\n\n.You can create memos for each app.\n\nMarkdown syntax supported:\n# Heading 1\n## Heading 2\n**Bold** *Italic*\n- List item\n```\nCode block\n```"
   memo_title: "{app_name} Memo"
   saved_status: "Saved"
   save_error: "Save error: {error}"
   template_header: "# {app_name} Memo\n\nEnter your memo here.\n\n## Created\n{timestamp}\n"
+  edit_tab: "Edit"
+  preview_tab: "Preview"
+  preview_empty: "*No content to preview*"
 
 settings_panel:
   title: "Settings"
