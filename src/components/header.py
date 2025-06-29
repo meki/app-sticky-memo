@@ -20,6 +20,7 @@ class HeaderComponent:
         """
         self.on_settings_click_callback = on_settings_click_callback
         self.on_always_on_top_callback = on_always_on_top_callback
+        self.page = None  # Will be set when added to page
         self._create_components()
         logger.debug("HeaderComponent initialized")
 
@@ -39,6 +40,21 @@ class HeaderComponent:
             on_change=self._on_always_on_top_change,
         )
 
+        # Title text component
+        self.title_text = ft.Text(
+            t("app.title"),
+            size=18,
+            weight=ft.FontWeight.BOLD,
+            text_align=ft.TextAlign.CENTER,
+        )
+
+        # Title container
+        self.title_container = ft.Container(
+            content=self.title_text,
+            alignment=ft.alignment.center,
+            visible=True,  # Default visible
+        )
+
         # Header row
         self.header = ft.Row(
             [
@@ -47,14 +63,9 @@ class HeaderComponent:
                     content=self.menu_button,
                     width=48,  # Fixed width for button
                 ),
-                # Center: Title
+                # Center: Title (conditionally visible, with expand for centering)
                 ft.Container(
-                    content=ft.Text(
-                        t("app.title"),
-                        size=24,
-                        weight=ft.FontWeight.BOLD,
-                        text_align=ft.TextAlign.CENTER,
-                    ),
+                    content=self.title_container,
                     expand=True,
                     alignment=ft.alignment.center,
                 ),
@@ -67,6 +78,50 @@ class HeaderComponent:
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
         logger.debug("Header components created")
+
+    def set_page(self, page):
+        """Set the page reference for accessing window properties"""
+        self.page = page
+        logger.debug("Page reference set for header component")
+        # Initial check for title visibility
+        self.update_title_visibility()
+
+    def update_title_visibility(self):
+        """Update title visibility based on window width"""
+        logger.debug("update_title_visibility called")
+
+        if not self.page:
+            logger.debug("No page reference - cannot update title visibility")
+            return
+
+        # Get window width from page.window.width
+        try:
+            window_width = self.page.window.width if self.page.window else None
+            logger.debug(f"Current window width: {window_width}")
+
+            if window_width is not None:
+                # Hide title if window width is 450px or less
+                should_show_title = window_width > 450
+                current_visibility = self.title_container.visible
+
+                if current_visibility != should_show_title:
+                    self.title_container.visible = should_show_title
+                    # Also hide the text itself for extra safety
+                    self.title_text.visible = should_show_title
+                    logger.info(
+                        f"Title visibility changed: {should_show_title} "
+                        f"(width: {window_width})"
+                    )
+                    # Update the page if available
+                    if hasattr(self.page, "update"):
+                        self.page.update()
+                        logger.debug("Page updated after title visibility change")
+                else:
+                    logger.debug("Title visibility unchanged")
+            else:
+                logger.warning("Could not get window width")
+        except Exception as e:
+            logger.error(f"Error updating title visibility: {e}")
 
     def _on_always_on_top_change(self, e):
         """Handle always-on-top checkbox change"""

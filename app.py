@@ -77,7 +77,7 @@ def main(page: ft.Page):
             set_shutdown()
             save_window_settings()
         elif e.data in ["moved", "resized"] and not is_shutting_down():
-            logger.debug("Window position or size changed")
+            logger.info(f"Window {e.data} event detected")
             # Save directly (no delay)
             save_window_settings()
 
@@ -117,19 +117,7 @@ def main(page: ft.Page):
             if is_shutting_down():
                 return
 
-    # Handle window resize
-    def on_resize(e):
-        if is_shutting_down():
-            return
-
-        width, height = page.window.width, page.window.height
-        logger.debug(f"Resize event: {width} x {height}")
-
-        # Save settings directly after resize (no delay)
-        save_window_settings()
-
     page.window.on_event = on_window_event
-    page.on_resize = on_resize
 
     # Handle page disconnect (as backup)
     def on_disconnect(e):
@@ -306,6 +294,43 @@ def main(page: ft.Page):
         on_always_on_top_callback=on_always_on_top_toggle,
     )
 
+    # Set page reference for header to handle window resize
+    header.set_page(page)
+
+    # Handle window resize
+    def on_resize(e):
+        logger.debug("page.on_resize event triggered")
+        if is_shutting_down():
+            logger.debug("Skipping resize handling due to shutdown")
+            return
+
+        width, height = page.window.width, page.window.height
+        logger.debug(f"Resize event: {width} x {height}")
+
+        # Save settings directly after resize (no delay)
+        save_window_settings()
+
+        header.update_title_visibility()
+
+    def enhanced_window_event(e):
+        logger.debug(f"Window event: {e.data}")
+
+        if e.data == "close":
+            logger.info("Window is closing - saving settings")
+            set_shutdown()
+            save_window_settings()
+        elif e.data in ["moved", "resized"] and not is_shutting_down():
+            logger.info(f"window.on_event {e.data} event detected")
+            # Save directly (no delay)
+            save_window_settings()
+
+            # If resized, update header title visibility
+            if e.data == "resized":
+                on_resize(e)
+
+    # Replace the window event handler with the enhanced version
+    page.window.on_event = enhanced_window_event
+
     # Callback for foreground app change
     def on_app_change(app_name):
         """Callback when app changes"""
@@ -427,6 +452,9 @@ def main(page: ft.Page):
         page.window.always_on_top = always_on_top
         header.set_always_on_top_state(always_on_top)
         logger.debug(f"Applied always-on-top setting: {always_on_top}")
+
+        # Update header title visibility after window settings are applied
+        header.update_title_visibility()
 
         try:
             if not is_shutting_down():
