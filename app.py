@@ -4,9 +4,6 @@ import time
 
 import flet as ft
 
-from src.components.app_display import AppDisplayComponent
-
-# Import new components and core logic
 from src.components.header import HeaderComponent
 from src.components.memo_editor import MemoEditor
 from src.components.settings_panel import SettingsPanel
@@ -141,9 +138,6 @@ def main(page: ft.Page):
         save_window_settings()
 
     page.on_disconnect = on_disconnect
-
-    # Initialize UI components
-    app_display = AppDisplayComponent()
 
     # Initialize memo manager
     memo_manager = MemoManager(settings_manager.get_data_save_dir())
@@ -311,9 +305,6 @@ def main(page: ft.Page):
             # Save current memo before loading new one
             save_current_memo()
 
-            # Only process on actual app change
-            app_display.update_app_name(app_name)
-            # Create/load memo file (app_name used as exe name)
             try:
                 memo_file = memo_manager.get_memo_file_path(app_name)
                 if not memo_file.exists():
@@ -369,7 +360,6 @@ def main(page: ft.Page):
     main_content = ft.Column(
         [
             header.get_component(),
-            app_display.get_component(),
             memo_editor.get_component(),  # Add memo editor
             settings_panel.get_component(),  # Add settings panel
         ],
