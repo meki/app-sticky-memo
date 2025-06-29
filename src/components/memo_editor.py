@@ -30,7 +30,7 @@ class MemoEditor:
         # Memo title display
         self.title_text = ft.Text(
             value=t("memo_editor.not_loaded"),
-            size=16,
+            size=14,
             weight=ft.FontWeight.W_500,
             color=ft.Colors.BLUE_GREY_600,
         )
@@ -67,7 +67,6 @@ class MemoEditor:
             tabs=[
                 ft.Tab(
                     text=t("memo_editor.edit_tab", default="Edit"),
-                    icon=ft.Icons.EDIT,
                     content=ft.Container(
                         content=self.text_area,
                         padding=ft.padding.all(0),
@@ -76,7 +75,6 @@ class MemoEditor:
                 ),
                 ft.Tab(
                     text=t("memo_editor.preview_tab", default="Preview"),
-                    icon=ft.Icons.PREVIEW,
                     content=ft.Container(
                         content=ft.Column(
                             [self.markdown_preview],
@@ -113,10 +111,10 @@ class MemoEditor:
                 spacing=0,
                 expand=True,
             ),
-            padding=ft.padding.all(20),
+            padding=ft.padding.all(10),
             bgcolor=ft.Colors.WHITE,
             border_radius=ft.border_radius.all(10),
-            margin=ft.margin.all(10),
+            margin=ft.margin.all(0),
             border=ft.border.all(1, ft.Colors.BLUE_GREY_200),
             expand=True,
         )

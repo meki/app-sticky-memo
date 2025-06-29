@@ -138,13 +138,9 @@ class HeaderComponent:
 
     def _on_menu_click(self, e):
         """Handle menu button click"""
-        print("DEBUG: Menu button clicked in header")
         logger.debug("Menu button clicked")
         if self.on_settings_click_callback:
-            print("DEBUG: Calling settings callback")
             self.on_settings_click_callback()
-        else:
-            print("DEBUG: No settings callback found!")
 
     def get_component(self):
         """Get the header component"""
