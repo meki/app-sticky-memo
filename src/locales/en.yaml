@@ -1,0 +1,46 @@
+# English locale
+app:
+  title: "App Sticky Memo"
+
+header:
+  settings_tooltip: "Settings"
+  always_on_top_label: "Pin to Front"
+
+memo_editor:
+  not_loaded: "No memo loaded"
+  hint_text: "Enter your memo here...\n\nMarkdown format is supported."
+  memo_title: "{app_name} Memo"
+  saved_status: "Saved"
+  save_error: "Save error: {error}"
+  template_header: "# {app_name} Memo\n\nEnter your memo here.\n\n## Created\n{timestamp}\n"
+
+settings_panel:
+  title: "Settings"
+  data_directory_label: "Data Save Directory:"
+  browse_button: "Browse"
+  save_button: "Save"
+  cancel_button: "Cancel"
+
+app_display:
+  focus_message: "App Sticky Memo is focused"
+
+messages:
+  settings_saved: "Settings saved"
+  invalid_directory: "Invalid directory"
+  directory_required: "Please enter a directory"
+  folder_picker_title: "Select folder"
+
+errors:
+  memo_load_error: "Failed to load memo file.\nError: {error}"
+  memo_save_error: "Memo file save error: {error}"
+  foreground_monitor_error: "Foreground monitor error: {error}"
+  window_settings_error: "Window settings reapplication error: {error}"
+  always_on_top_error: "Always on top setting change error: {error}"
+
+logging:
+  app_start: "Starting App Sticky Memo"
+  app_launch: "Launching App Sticky Memo"
+  shutdown_flag_set: "Application shutdown flag set"
+  ui_build_complete: "UI construction completed"
+  window_settings_applied: "Window settings reapplication completed"
+  always_on_top_changed: "Always on top setting changed: {enabled}"

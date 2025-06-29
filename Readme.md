@@ -1,36 +1,115 @@
 # App Sticky Memo
 
-アプリ毎にメモを残せる Windows 専用アプリです。
-ユーザーが使用するアプリを切り替えると、自動的にそのアプリに関連するメモが表示されます。
-メモはアプリごとに保存され、アプリを切り替えることで異なるメモを簡単に確認できます。
-そのため、たまにしか使わないアプリのメモも、アプリを切り替えるだけで簡単に確認できます。
+> 📖 **日本語版** | [Japanese Documentation](docs/Readme.ja.md)
 
-## 機能
+A Windows-exclusive application that allows you to save notes for each application.
+When you switch between applications, the relevant notes for that application are automatically displayed.
+Notes are saved per application, making it easy to view different notes by simply switching applications.
+This makes it easy to check notes for rarely used applications just by switching to them.
 
-- **アプリごとにメモを保存**: 各アプリケーション（exe 名）ごとに独立したメモファイルを自動作成
-- **自動切り替え**: アプリを切り替えると自動的に関連するメモに切り替わり
-- **設定機能**: データ保存ディレクトリをカスタマイズ可能
-- **ウィンドウ位置の記憶**: アプリ終了時にウィンドウの位置とサイズを保存し、次回起動時に復元
-- **常に最前面表示**: チェックボックスでアプリを常に最前面に表示可能
-- **マークダウン対応**: メモファイルは Markdown 形式で保存され、見出しやリスト、リンクなどが使用可能
-- **自動保存**: メモの内容は自動的に保存されるため、手動での保存は不要
-- **多言語対応**: UI テキストが外部ファイル化されており、将来的な言語追加が容易
+## Features
 
-## インストール方法
+- **Per-Application Note Storage**: Automatically creates independent memo files for each application (exe name)
+- **Automatic Switching**: Automatically switches to relevant notes when switching applications
+- **Settings Configuration**: Customizable data save directory
+- **Window Position Memory**: Saves window position and size on exit, restores on next startup
+- **Always on Top**: Checkbox to keep the application window always on top
+- **Markdown Support**: Memo files are saved in Markdown format, supporting headers, lists, links, etc.
+- **Auto-Save**: Note contents are automatically saved, no manual saving required
+- **Multi-language Support**: UI text is externalized to files, making future language additions easy
 
-1. Release ページ から最新のリリースをダウンロードします。
-2. ダウンロードした ZIP ファイルを解凍します。
-3. 解凍したフォルダ内の `AppStickyMemo.exe` を実行します。
+## Installation
 
-## 使用方法
+1. Download the latest release from the Release page
+2. Extract the downloaded ZIP file
+3. Run `AppStickyMemo.exe` from the extracted folder
 
-1. **アプリ起動**: アプリを起動すると、現在アクティブなアプリが検出され、対応するメモファイルが自動作成されます
-2. **設定**: 右上の歯車ボタンから設定パネルを開き、メモファイルの保存先ディレクトリを変更できます
-3. **アプリ切り替え**: 別のアプリケーションに切り替えると、そのアプリに関連するメモファイルが自動作成されます
-4. **ウィンドウサイズ**: ウィンドウのサイズや位置を変更すると、アプリ終了時に自動保存され、次回起動時に復元されます
+## Usage
 
-## メモファイルについて
+1. **App Startup**: When the app starts, it detects the currently active application and automatically creates the corresponding memo file
+2. **Settings**: Open the settings panel via the gear button in the top right to change the memo file save directory
+3. **App Switching**: When switching to another application, the memo file related to that app is automatically created
+4. **Window Size**: Window size and position changes are automatically saved on app exit and restored on next startup
+5. **Always on Top**: Use the "Pin to Front" checkbox in the header to keep the app always visible
 
-- メモファイルは `[アプリ名].md` の形式で保存されます
-- ファイルは Markdown 形式なので、テキストエディタで直接編集することも可能です
-- デフォルトの保存先: `C:\Users\[ユーザー名]\Documents\StickyMemos\`
+## About Memo Files
+
+- Memo files are saved in the format `[AppName].md`
+- Files are in Markdown format, so they can be directly edited with text editors
+- Default save location: `C:\Users\[Username]\Documents\StickyMemos\`
+
+## Development
+
+### Requirements
+
+- Python 3.11+
+- uv package manager
+
+### Setup
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd app-sticky-memo
+
+# Install dependencies
+uv sync
+
+# Run the application
+uv run python app.py
+```
+
+### Code Quality
+
+The project uses pre-commit hooks for code quality:
+
+```bash
+# Run all quality checks
+uv run pre-commit run --all-files
+```
+
+### Project Structure
+
+```
+app-sticky-memo/
+├── app.py                 # Main application entry point
+├── src/
+│   ├── components/        # UI components
+│   │   ├── header.py      # Header with title and controls
+│   │   ├── memo_editor.py # Memo editor with auto-save
+│   │   ├── app_display.py # Current app name display
+│   │   └── settings_panel.py # Settings configuration panel
+│   ├── core/              # Core business logic
+│   │   ├── foreground_monitor.py # Tracks foreground apps
+│   │   ├── memo_manager.py # Manages per-app memo files
+│   │   └── settings_manager.py # Handles app settings
+│   └── locales/           # Internationalization
+│       ├── i18n.py        # I18n manager
+│       └── ja.yaml        # Japanese translations
+├── docs/
+│   └── Readme.ja.md       # Japanese documentation
+└── pyproject.toml         # Project configuration
+```
+
+## Architecture
+
+The application follows a modular architecture:
+
+- **UI Components**: Separate classes for each UI element with clear responsibilities
+- **Core Logic**: Business logic separated from UI concerns
+- **Settings Management**: Persistent configuration with JSON storage
+- **Memo Management**: Per-application file handling with auto-save
+- **Foreground Monitoring**: Background service to track active applications
+- **Internationalization**: YAML-based translation system
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run code quality checks: `uv run pre-commit run --all-files`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
