@@ -8,7 +8,7 @@ header:
 
 memo_editor:
   not_loaded: "No memo loaded"
-  hint_text: "Enter your memo here...\n\nMarkdown format is supported."
+  hint_text: "Switch focus on another apps...\n\n.You can create memos for each app."
   memo_title: "{app_name} Memo"
   saved_status: "Saved"
   save_error: "Save error: {error}"

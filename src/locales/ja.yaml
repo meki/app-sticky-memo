@@ -8,7 +8,7 @@ header:
 
 memo_editor:
   not_loaded: "メモが読み込まれていません"
-  hint_text: "ここにメモを入力してください...\n\nMarkdown形式で記述できます。"
+  hint_text: "他のアプリにフォーカスして下さい...\n\nアプリ毎にメモが可能です。"
   memo_title: "{app_name} のメモ"
   saved_status: "保存しました"
   save_error: "保存エラー: {error}"
