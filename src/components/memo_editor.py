@@ -62,7 +62,7 @@ class MemoEditor:
         # Tab container for edit/preview modes
         self.tab_container = ft.Tabs(
             selected_index=0,
-            animation_duration=300,
+            animation_duration=150,
             expand=True,
             tabs=[
                 ft.Tab(
