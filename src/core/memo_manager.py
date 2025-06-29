@@ -261,6 +261,20 @@ class MemoManager:
         except Exception as e:
             logger.error(f"マッピングファイル保存エラー: {e}")
 
+    def _remove_extension(self, filename: str) -> str:
+        """
+        ファイル名から拡張子を除去
+
+        Args:
+            filename: 元のファイル名
+
+        Returns:
+            拡張子を除いたファイル名
+        """
+        if filename.lower().endswith(".exe"):
+            return filename[:-4]
+        return filename
+
     def get_memo_name(self, exe_name: str) -> str:
         """
         exe名からmemo名を取得
@@ -277,11 +291,12 @@ class MemoManager:
             logger.debug(f"マッピング使用: {exe_name} -> {memo_name}")
             return memo_name
 
-        # マッピングに存在しない場合は自動作成
-        self.mapping[exe_name] = exe_name
+        # マッピングに存在しない場合は自動作成（拡張子を除く）
+        base_name = self._remove_extension(exe_name)
+        self.mapping[exe_name] = base_name
         self.save_mapping()
-        logger.debug(f"新しいマッピング作成: {exe_name} -> {exe_name}")
-        return exe_name
+        logger.debug(f"新しいマッピング作成: {exe_name} -> {base_name}")
+        return base_name
 
     def update_mapping(self, exe_name: str, memo_name: str):
         """

@@ -46,6 +46,7 @@ This makes it easy to check notes for rarely used applications just by switching
 - Future UI functionality for editing these mappings is planned
 
 **Example mapping file (mapping.yaml):**
+
 ```yaml
 version: "1.0"
 description: "Mapping between exe names and memo names"
@@ -53,7 +54,7 @@ mappings:
   - exe_name: "chrome.exe"
     memo_name: "Chrome"
   - exe_name: "chrome_64.exe"
-    memo_name: "Chrome"  # Share the same memo
+    memo_name: "Chrome" # Share the same memo
   - exe_name: "メモ帳.exe"
     memo_name: "Notepad"
   - exe_name: "Visual Studio Code.exe"

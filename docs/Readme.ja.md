@@ -40,11 +40,12 @@
 ### アプリとメモの対応関係
 
 - データ保存ディレクトリに `mapping.yaml` ファイルが自動作成されます
-- このファイルで実行ファイル名（exe名）とメモ名の対応関係を管理します
-- デフォルトでは exe名 = メモ名 として自動的にマッピングが作成されます
-- 将来的にはUIでこのマッピングを編集できる機能を追加予定です
+- このファイルで実行ファイル名（exe 名）とメモ名の対応関係を管理します
+- デフォルトでは exe 名 = メモ名 として自動的にマッピングが作成されます
+- 将来的には UI でこのマッピングを編集できる機能を追加予定です
 
 **マッピングファイル例（mapping.yaml）:**
+
 ```yaml
 version: "1.0"
 description: "Mapping between exe names and memo names"
@@ -52,7 +53,7 @@ mappings:
   - exe_name: "chrome.exe"
     memo_name: "Chrome"
   - exe_name: "chrome_64.exe"
-    memo_name: "Chrome"  # 同じメモを共有
+    memo_name: "Chrome" # 同じメモを共有
   - exe_name: "メモ帳.exe"
     memo_name: "メモ帳"
   - exe_name: "Visual Studio Code.exe"
@@ -61,7 +62,7 @@ mappings:
     memo_name: "テストプログラム"
 ```
 
-これにより、日本語や中国語などの多言語exe名にも対応し、同一プログラムの異なるバージョン（32bit/64bit版など）で同じメモを共有できます。
+これにより、日本語や中国語などの多言語 exe 名にも対応し、同一プログラムの異なるバージョン（32bit/64bit 版など）で同じメモを共有できます。
 
 ## 開発
 
