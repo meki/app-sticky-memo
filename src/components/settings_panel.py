@@ -2,6 +2,8 @@ from collections.abc import Callable
 
 import flet as ft
 
+from src.locales.i18n import t
+
 
 class SettingsPanel:
     """設定パネルのUIコンポーネント"""
@@ -21,7 +23,7 @@ class SettingsPanel:
 
         # テキストフィールド
         self.data_dir_field = ft.TextField(
-            label="Data Save Directory",
+            label=t("settings_panel.data_directory_label"),
             value=initial_data_dir,
             width=300,
             multiline=False,
@@ -37,7 +39,11 @@ class SettingsPanel:
                 [
                     ft.Row(
                         [
-                            ft.Text("設定", size=20, weight=ft.FontWeight.BOLD),
+                            ft.Text(
+                                t("settings_panel.title"),
+                                size=20,
+                                weight=ft.FontWeight.BOLD,
+                            ),
                             ft.Container(expand=True),
                             ft.IconButton(
                                 icon=ft.Icons.CLOSE,
@@ -47,13 +53,13 @@ class SettingsPanel:
                         ]
                     ),
                     ft.Container(height=10),
-                    ft.Text("データ保存ディレクトリ:", size=14),
+                    ft.Text(t("settings_panel.data_directory_label"), size=14),
                     ft.Container(height=5),
                     ft.Row(
                         [
                             self.data_dir_field,
                             ft.ElevatedButton(
-                                "選択",
+                                t("settings_panel.browse_button"),
                                 icon=ft.Icons.FOLDER_OPEN,
                                 on_click=self._on_pick_directory_click,
                             ),
@@ -63,9 +69,15 @@ class SettingsPanel:
                     ft.Row(
                         [
                             ft.Container(expand=True),
-                            ft.TextButton("キャンセル", on_click=self._on_cancel_click),
+                            ft.TextButton(
+                                t("settings_panel.cancel_button"),
+                                on_click=self._on_cancel_click,
+                            ),
                             ft.Container(width=10),
-                            ft.ElevatedButton("保存", on_click=self._on_save_click),
+                            ft.ElevatedButton(
+                                t("settings_panel.save_button"),
+                                on_click=self._on_save_click,
+                            ),
                         ]
                     ),
                 ],

@@ -2,6 +2,8 @@ import logging
 
 import flet as ft
 
+from src.locales.i18n import t
+
 logger = logging.getLogger("app_sticky_memo")
 
 
@@ -25,7 +27,7 @@ class HeaderComponent:
         """ヘッダーコンポーネントを作成"""
         # 常に最前面チェックボックス
         self.always_on_top_checkbox = ft.Checkbox(
-            label="最前面にピン",
+            label=t("header.always_on_top_label"),
             value=False,
             on_change=self._on_always_on_top_change,
         )
@@ -33,7 +35,7 @@ class HeaderComponent:
         # 設定ボタン
         self.settings_button = ft.IconButton(
             icon=ft.Icons.SETTINGS,
-            tooltip="設定",
+            tooltip=t("header.settings_tooltip"),
             on_click=self._on_settings_click,
         )
 
@@ -48,7 +50,7 @@ class HeaderComponent:
                 # 中央：タイトル
                 ft.Container(
                     content=ft.Text(
-                        "App Sticky Memo",
+                        t("app.title"),
                         size=24,
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER,

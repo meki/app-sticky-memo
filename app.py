@@ -13,6 +13,7 @@ from src.components.settings_panel import SettingsPanel
 from src.core.foreground_monitor import ForegroundMonitor
 from src.core.memo_manager import MemoManager
 from src.core.settings_manager import SettingsManager
+from src.locales.i18n import t
 
 # カスタムロガーの設定
 logger = logging.getLogger("app_sticky_memo")
@@ -33,8 +34,8 @@ logger.addHandler(console_handler)
 
 
 def main(page: ft.Page):
-    logger.info("App Sticky Memo を開始します")
-    page.title = "App Sticky Memo"
+    logger.info(t("logging.app_start"))
+    page.title = t("app.title")
     page.vertical_alignment = ft.MainAxisAlignment.START
     page.padding = ft.padding.all(10)
 
@@ -226,7 +227,7 @@ def main(page: ft.Page):
                     logger.error(f"フォルダ選択更新エラー: {ex}")
 
         file_picker.on_result = on_result
-        file_picker.get_directory_path("フォルダを選択してください")
+        file_picker.get_directory_path(t("messages.folder_picker_title"))
 
     # 設定保存コールバック
     def on_settings_save(new_data_dir):
@@ -243,7 +244,9 @@ def main(page: ft.Page):
                 # メモマネージャーのデータディレクトリも更新
                 memo_manager.update_data_dir(new_data_dir)
                 # SnackBarの表示
-                page.snack_bar = ft.SnackBar(content=ft.Text("設定を保存しました"))
+                page.snack_bar = ft.SnackBar(
+                    content=ft.Text(t("messages.settings_saved"))
+                )
                 page.snack_bar.open = True
                 try:
                     if not is_shutting_down():
@@ -253,7 +256,9 @@ def main(page: ft.Page):
                 logger.info(f"設定を保存しました: {new_data_dir}")
                 toggle_settings_panel()  # 設定パネルを閉じる
             else:
-                page.snack_bar = ft.SnackBar(content=ft.Text("無効なディレクトリです"))
+                page.snack_bar = ft.SnackBar(
+                    content=ft.Text(t("messages.invalid_directory"))
+                )
                 page.snack_bar.open = True
                 try:
                     if not is_shutting_down():
@@ -262,7 +267,7 @@ def main(page: ft.Page):
                     logger.error(f"エラー表示更新エラー: {ex}")
                 logger.error(f"無効なディレクトリです: {new_data_dir}")
         else:
-            snack_text = "ディレクトリを入力してください"
+            snack_text = t("messages.directory_required")
             page.snack_bar = ft.SnackBar(content=ft.Text(snack_text))
             page.snack_bar.open = True
             try:

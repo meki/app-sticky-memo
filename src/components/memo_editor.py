@@ -4,6 +4,8 @@ from pathlib import Path
 
 import flet as ft
 
+from src.locales.i18n import t
+
 logger = logging.getLogger("app_sticky_memo")
 
 
@@ -27,7 +29,7 @@ class MemoEditor:
         """エディターコンポーネントを作成"""
         # メモタイトル表示
         self.title_text = ft.Text(
-            value="メモが読み込まれていません",
+            value=t("memo_editor.not_loaded"),
             size=16,
             weight=ft.FontWeight.W_500,
             color=ft.Colors.BLUE_GREY_600,
@@ -37,7 +39,7 @@ class MemoEditor:
         self.text_area = ft.TextField(
             multiline=True,
             expand=True,
-            hint_text="ここにメモを入力してください...\n\nMarkdown形式で記述できます。",
+            hint_text=t("memo_editor.hint_text"),
             border=ft.InputBorder.OUTLINE,
             content_padding=ft.padding.all(15),
             text_size=14,
@@ -91,7 +93,7 @@ class MemoEditor:
             app_name: アプリケーション名
         """
         self.current_file_path = file_path
-        self.title_text.value = f"{app_name} のメモ"
+        self.title_text.value = t("memo_editor.memo_title", app_name=app_name)
 
         try:
             if file_path.exists():
@@ -101,10 +103,10 @@ class MemoEditor:
                     logger.debug(f"メモファイルを読み込みました: {file_path}")
             else:
                 # 新しいメモファイルのテンプレート
-                template_content = (
-                    f"# {app_name} のメモ\n\n"
-                    f"ここにメモを記述してください。\n\n"
-                    f"## 作成日時\n{self._get_current_timestamp()}\n"
+                template_content = t(
+                    "memo_editor.template_header",
+                    app_name=app_name,
+                    timestamp=self._get_current_timestamp(),
                 )
                 self.text_area.value = template_content
                 msg = f"新しいメモファイル用テンプレートを設定しました: {file_path}"
@@ -115,7 +117,7 @@ class MemoEditor:
 
         except Exception as e:
             logger.error(f"メモファイル読み込みエラー: {e}")
-            error_msg = f"メモファイルの読み込みに失敗しました。\nエラー: {e}"
+            error_msg = t("errors.memo_load_error", error=str(e))
             self.text_area.value = f"# {app_name} のメモ\n\n{error_msg}\n"
             self.is_dirty = False
 
@@ -137,14 +139,14 @@ class MemoEditor:
                 f.write(self.text_area.value)
 
             self.is_dirty = False
-            self.save_status.value = "保存しました"
+            self.save_status.value = t("memo_editor.saved_status")
             self.save_status.visible = True
             logger.debug(f"メモファイルを保存しました: {self.current_file_path}")
             return True
 
         except Exception as e:
             logger.error(f"メモファイル保存エラー: {e}")
-            self.save_status.value = f"保存エラー: {e}"
+            self.save_status.value = t("memo_editor.save_error", error=str(e))
             self.save_status.color = ft.Colors.RED_600
             self.save_status.visible = True
             return False
@@ -186,7 +188,7 @@ class MemoEditor:
     def clear_memo(self):
         """メモをクリア"""
         self.text_area.value = ""
-        self.title_text.value = "メモが読み込まれていません"
+        self.title_text.value = t("memo_editor.not_loaded")
         self.current_file_path = None
         self.is_dirty = False
         self.save_status.visible = False

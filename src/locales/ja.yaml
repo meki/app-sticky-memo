@@ -1,0 +1,46 @@
+# 日本語ロケール
+app:
+  title: "App Sticky Memo"
+
+header:
+  settings_tooltip: "設定"
+  always_on_top_label: "最前面にピン"
+
+memo_editor:
+  not_loaded: "メモが読み込まれていません"
+  hint_text: "ここにメモを入力してください...\n\nMarkdown形式で記述できます。"
+  memo_title: "{app_name} のメモ"
+  saved_status: "保存しました"
+  save_error: "保存エラー: {error}"
+  template_header: "# {app_name} のメモ\n\nここにメモを記述してください。\n\n## 作成日時\n{timestamp}\n"
+
+settings_panel:
+  title: "設定"
+  data_directory_label: "データ保存ディレクトリ:"
+  browse_button: "参照"
+  save_button: "保存"
+  cancel_button: "キャンセル"
+
+app_display:
+  focus_message: "App Sticky Memo にフォーカス中"
+
+messages:
+  settings_saved: "設定を保存しました"
+  invalid_directory: "無効なディレクトリです"
+  directory_required: "ディレクトリを入力してください"
+  folder_picker_title: "フォルダを選択してください"
+
+errors:
+  memo_load_error: "メモファイルの読み込みに失敗しました。\nエラー: {error}"
+  memo_save_error: "メモファイル保存エラー: {error}"
+  foreground_monitor_error: "フォアグラウンド監視エラー: {error}"
+  window_settings_error: "ウィンドウ設定の再適用でエラー: {error}"
+  always_on_top_error: "常に最前面設定変更エラー: {error}"
+
+logging:
+  app_start: "App Sticky Memo を開始します"
+  app_launch: "App Sticky Memo を起動します"
+  shutdown_flag_set: "アプリケーション終了フラグを設定しました"
+  ui_build_complete: "UIの構築が完了しました"
+  window_settings_applied: "ウィンドウ設定の再適用が完了しました"
+  always_on_top_changed: "常に最前面設定を変更しました: {enabled}"
