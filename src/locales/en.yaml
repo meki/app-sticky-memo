@@ -3,7 +3,7 @@ app:
   title: "App Sticky Memo"
 
 header:
-  settings_tooltip: "Settings"
+  menu_tooltip: "Menu"
   always_on_top_label: "Pin to Front"
 
 memo_editor:

@@ -103,7 +103,6 @@ app-sticky-memo/
 │   ├── components/        # UIコンポーネント
 │   │   ├── header.py      # タイトルとコントロールのヘッダー
 │   │   ├── memo_editor.py # 自動保存付きメモエディター
-│   │   ├── app_display.py # 現在のアプリ名表示
 │   │   └── settings_panel.py # 設定パネル
 │   ├── core/              # コアビジネスロジック
 │   │   ├── foreground_monitor.py # フォアグラウンドアプリ追跡

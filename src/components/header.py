@@ -25,27 +25,27 @@ class HeaderComponent:
 
     def _create_components(self):
         """Create header components"""
-        # Always-on-top checkbox
+        # Hamburger menu button
+        self.menu_button = ft.IconButton(
+            icon=ft.Icons.MENU,
+            tooltip=t("header.menu_tooltip"),
+            on_click=self._on_menu_click,
+        )
+
+        # Always-on-top checkbox (moved to sidebar)
         self.always_on_top_checkbox = ft.Checkbox(
             label=t("header.always_on_top_label"),
             value=False,
             on_change=self._on_always_on_top_change,
         )
 
-        # Settings button
-        self.settings_button = ft.IconButton(
-            icon=ft.Icons.SETTINGS,
-            tooltip=t("header.settings_tooltip"),
-            on_click=self._on_settings_click,
-        )
-
         # Header row
         self.header = ft.Row(
             [
-                # Left: Always-on-top checkbox
+                # Left: Hamburger menu
                 ft.Container(
-                    content=self.always_on_top_checkbox,
-                    width=120,  # Fixed width for checkbox
+                    content=self.menu_button,
+                    width=48,  # Fixed width for button
                 ),
                 # Center: Title
                 ft.Container(
@@ -58,10 +58,10 @@ class HeaderComponent:
                     expand=True,
                     alignment=ft.alignment.center,
                 ),
-                # Right: Settings button
+                # Right: Always-on-top checkbox
                 ft.Container(
-                    content=self.settings_button,
-                    width=48,  # Fixed width for button
+                    content=self.always_on_top_checkbox,
+                    width=150,  # Fixed width for checkbox
                 ),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -81,11 +81,15 @@ class HeaderComponent:
             self.always_on_top_checkbox.value = is_on_top
             logger.debug(f"Always-on-top checkbox state set: {is_on_top}")
 
-    def _on_settings_click(self, e):
-        """Handle settings button click"""
-        logger.debug("Settings button clicked")
+    def _on_menu_click(self, e):
+        """Handle menu button click"""
+        print("DEBUG: Menu button clicked in header")
+        logger.debug("Menu button clicked")
         if self.on_settings_click_callback:
+            print("DEBUG: Calling settings callback")
             self.on_settings_click_callback()
+        else:
+            print("DEBUG: No settings callback found!")
 
     def get_component(self):
         """Get the header component"""

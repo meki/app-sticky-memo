@@ -104,7 +104,6 @@ app-sticky-memo/
 │   ├── components/        # UI components
 │   │   ├── header.py      # Header with title and controls
 │   │   ├── memo_editor.py # Memo editor with auto-save
-│   │   ├── app_display.py # Current app name display
 │   │   └── settings_panel.py # Settings configuration panel
 │   ├── core/              # Core business logic
 │   │   ├── foreground_monitor.py # Tracks foreground apps

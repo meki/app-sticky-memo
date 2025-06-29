@@ -3,7 +3,7 @@ app:
   title: "App Sticky Memo"
 
 header:
-  settings_tooltip: "設定"
+  menu_tooltip: "メニュー"
   always_on_top_label: "最前面にピン"
 
 memo_editor:

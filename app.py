@@ -192,7 +192,15 @@ def main(page: ft.Page):
         nonlocal settings_panel_visible
         settings_panel_visible = not settings_panel_visible
         logger.debug(f"Settings panel visibility: {settings_panel_visible}")
+
+        # Update settings panel visibility
         settings_panel.toggle()
+
+        # Recreate layout
+        page.controls.clear()
+        app_layout = create_layout()
+        page.add(app_layout)
+
         try:
             if not is_shutting_down():
                 page.update()
@@ -357,18 +365,50 @@ def main(page: ft.Page):
     threading.Thread(target=initial_app_check, daemon=True).start()
 
     logger.debug("Building UI")
+
+    # Create main content area
     main_content = ft.Column(
         [
             header.get_component(),
-            memo_editor.get_component(),  # Add memo editor
-            settings_panel.get_component(),  # Add settings panel
+            memo_editor.get_component(),
         ],
         alignment=ft.MainAxisAlignment.START,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         expand=True,
     )
 
-    page.add(main_content)
+    # Function to create layout with conditional sidebar
+    def create_layout():
+        """Create layout with conditional sidebar"""
+        if settings_panel_visible:
+            # When sidebar is visible, show it as overlay
+            return ft.Stack(
+                [
+                    # Main content (background layer)
+                    ft.Container(
+                        content=main_content,
+                        expand=True,
+                    ),
+                    # Sidebar overlay (foreground layer)
+                    ft.Container(
+                        content=settings_panel.get_component(),
+                        alignment=ft.alignment.center_left,
+                        expand=True,
+                    ),
+                ],
+                expand=True,
+            )
+        else:
+            # When sidebar is hidden, show only main content
+            return ft.Container(
+                content=main_content,
+                expand=True,
+            )
+
+    # Create initial app layout
+    app_layout = create_layout()
+
+    page.add(app_layout)
     logger.info("UI build complete")
 
     # Apply window settings directly after page load
