@@ -1,6 +1,8 @@
 import logging
+import sys
 import threading
 import time
+from pathlib import Path
 
 import flet as ft
 
@@ -30,11 +32,34 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
+def get_resource_path(relative_path: str) -> Path:
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = Path(sys._MEIPASS)
+    except AttributeError:
+        # Normal execution
+        base_path = Path(__file__).parent
+
+    return base_path / relative_path
+
+
 def main(page: ft.Page):
     logger.info(t("logging.app_start"))
     page.title = t("app.title")
     page.vertical_alignment = ft.MainAxisAlignment.START
     page.padding = ft.padding.all(10)
+
+    # Set window icon
+    try:
+        icon_path = get_resource_path("assets/app_icon.ico")
+        if icon_path.exists():
+            page.window.icon = str(icon_path)
+            logger.debug(f"Window icon set: {icon_path}")
+        else:
+            logger.warning(f"Icon file not found: {icon_path}")
+    except Exception as e:
+        logger.error(f"Failed to set window icon: {e}")
 
     # Application shutdown flag (kept as a global reference)
     _shutdown_event = threading.Event()
@@ -466,5 +491,11 @@ def main(page: ft.Page):
         logger.error(f"Error reapplying window settings: {ex}")
 
 
-logger.info("Starting App Sticky Memo")
-ft.app(main)
+def app():
+    """Application entry point for packaging"""
+    logger.info("Starting App Sticky Memo")
+    ft.app(main)
+
+
+if __name__ == "__main__":
+    app()

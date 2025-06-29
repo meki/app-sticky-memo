@@ -1,9 +1,22 @@
 import logging
+import sys
 from pathlib import Path
 
 import yaml
 
 logger = logging.getLogger("app_sticky_memo")
+
+
+def get_resource_path(relative_path: str) -> Path:
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = Path(sys._MEIPASS)
+    except AttributeError:
+        # Normal execution
+        base_path = Path(__file__).parent.parent.parent
+
+    return base_path / relative_path
 
 
 class I18nManager:
@@ -18,10 +31,14 @@ class I18nManager:
             locales_dir: Directory where locale files are stored
         """
         self.language = language
-        self.locales_dir = Path(locales_dir)
+        # Use resource path function for proper path resolution
+        self.locales_dir = get_resource_path(locales_dir)
         self.strings = {}
         self._load_language_file()
-        logger.debug(f"I18nManager initialized (language: {language})")
+        logger.debug(
+            f"I18nManager initialized (language: {language}, "
+            f"locales_dir: {self.locales_dir})"
+        )
 
     def _load_language_file(self):
         """Load language file"""
