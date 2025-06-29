@@ -37,6 +37,13 @@ errors:
   window_settings_error: "ウィンドウ設定の再適用でエラー: {error}"
   always_on_top_error: "常に最前面設定変更エラー: {error}"
 
+memo_manager:
+  mapping_created: "新しいマッピング作成: {exe_name} -> {memo_name}"
+  mapping_updated: "マッピングを更新しました: {exe_name} -> {memo_name}"
+  mapping_loaded: "マッピングファイルを読み込みました: {count} 項目"
+  mapping_saved: "マッピングファイルを保存しました: {count} 項目"
+  mapping_file_error: "マッピングファイルエラー: {error}"
+
 logging:
   app_start: "App Sticky Memo を開始します"
   app_launch: "App Sticky Memo を起動します"

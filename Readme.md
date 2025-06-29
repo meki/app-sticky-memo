@@ -34,9 +34,35 @@ This makes it easy to check notes for rarely used applications just by switching
 
 ## About Memo Files
 
-- Memo files are saved in the format `[AppName].md`
+- Memo files are saved in the format `[MemoName].md`
 - Files are in Markdown format, so they can be directly edited with text editors
 - Default save location: `C:\Users\[Username]\Documents\StickyMemos\`
+
+### Application-to-Memo Mapping
+
+- A `mapping.yaml` file is automatically created in the data save directory
+- This file manages the correspondence between executable names (exe names) and memo names
+- By default, exe name = memo name mappings are created automatically
+- Future UI functionality for editing these mappings is planned
+
+**Example mapping file (mapping.yaml):**
+```yaml
+version: "1.0"
+description: "Mapping between exe names and memo names"
+mappings:
+  - exe_name: "chrome.exe"
+    memo_name: "Chrome"
+  - exe_name: "chrome_64.exe"
+    memo_name: "Chrome"  # Share the same memo
+  - exe_name: "メモ帳.exe"
+    memo_name: "Notepad"
+  - exe_name: "Visual Studio Code.exe"
+    memo_name: "VSCode"
+  - exe_name: "测试程序.exe"
+    memo_name: "TestProgram"
+```
+
+This supports multi-language exe names (Japanese, Chinese, etc.) and allows different versions of the same program (32bit/64bit editions, etc.) to share the same memo.
 
 ## Development
 

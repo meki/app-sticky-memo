@@ -37,6 +37,13 @@ errors:
   window_settings_error: "Window settings reapplication error: {error}"
   always_on_top_error: "Always on top setting change error: {error}"
 
+memo_manager:
+  mapping_created: "New mapping created: {exe_name} -> {memo_name}"
+  mapping_updated: "Mapping updated: {exe_name} -> {memo_name}"
+  mapping_loaded: "Mapping file loaded: {count} items"
+  mapping_saved: "Mapping file saved: {count} items"
+  mapping_file_error: "Mapping file error: {error}"
+
 logging:
   app_start: "Starting App Sticky Memo"
   app_launch: "Launching App Sticky Memo"

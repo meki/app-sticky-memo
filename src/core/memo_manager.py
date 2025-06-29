@@ -2,6 +2,8 @@ import logging
 import time
 from pathlib import Path
 
+import yaml
+
 logger = logging.getLogger("app_sticky_memo")
 
 
@@ -16,7 +18,10 @@ class MemoManager:
             data_dir: メモファイルの保存ディレクトリ
         """
         self.data_dir = Path(data_dir)
+        self.mapping_file = self.data_dir / "mapping.yaml"
+        self.mapping = {}
         self.ensure_data_dir()
+        self.load_mapping()
         logger.debug(f"MemoManagerを初期化しました: {self.data_dir}")
 
     def ensure_data_dir(self) -> bool:
@@ -28,18 +33,19 @@ class MemoManager:
             logger.error(f"データディレクトリ作成エラー: {e}")
             return False
 
-    def get_memo_file_path(self, app_name: str) -> Path:
+    def get_memo_file_path(self, exe_name: str) -> Path:
         """
-        アプリ名からメモファイルのパスを生成
+        exe名からメモファイルのパスを生成
 
         Args:
-            app_name: アプリケーション名
+            exe_name: 実行可能ファイル名
 
         Returns:
             メモファイルのパス
         """
-        safe_app_name = self._sanitize_filename(app_name)
-        return self.data_dir / f"{safe_app_name}.md"
+        memo_name = self.get_memo_name(exe_name)
+        safe_memo_name = self._sanitize_filename(memo_name)
+        return self.data_dir / f"{safe_memo_name}.md"
 
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -65,23 +71,24 @@ class MemoManager:
 
         return safe_chars
 
-    def create_memo_file(self, app_name: str, content: str | None = None) -> Path:
+    def create_memo_file(self, exe_name: str, content: str | None = None) -> Path:
         """
         メモファイルを作成
 
         Args:
-            app_name: アプリケーション名
+            exe_name: 実行可能ファイル名
             content: 初期コンテンツ（Noneの場合はデフォルトテンプレート）
 
         Returns:
             作成されたメモファイルのパス
         """
-        memo_file = self.get_memo_file_path(app_name)
+        memo_file = self.get_memo_file_path(exe_name)
 
         if not memo_file.exists():
             try:
                 if content is None:
-                    content = self._create_default_content(app_name)
+                    memo_name = self.get_memo_name(exe_name)
+                    content = self._create_default_content(memo_name)
 
                 with open(memo_file, "w", encoding="utf-8") as f:
                     f.write(content)
@@ -199,5 +206,95 @@ class MemoManager:
             new_data_dir: 新しいデータディレクトリ
         """
         self.data_dir = Path(new_data_dir)
+        self.mapping_file = self.data_dir / "mapping.yaml"
         self.ensure_data_dir()
+        self.load_mapping()
         logger.info(f"データディレクトリを更新しました: {self.data_dir}")
+
+    def load_mapping(self):
+        """マッピングファイルを読み込み"""
+        try:
+            if self.mapping_file.exists():
+                with open(self.mapping_file, encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                    mappings_list = data.get("mappings", [])
+                    # リスト形式から辞書形式に変換
+                    self.mapping = {}
+                    for item in mappings_list:
+                        if (
+                            isinstance(item, dict)
+                            and "exe_name" in item
+                            and "memo_name" in item
+                        ):
+                            self.mapping[item["exe_name"]] = item["memo_name"]
+                logger.debug(f"マッピング読み込み完了: {len(self.mapping)} 項目")
+            else:
+                self.mapping = {}
+                logger.debug("マッピングファイルが存在しません - 空で開始")
+        except Exception as e:
+            logger.error(f"マッピングファイル読み込みエラー: {e}")
+            self.mapping = {}
+
+    def save_mapping(self):
+        """マッピングファイルを保存"""
+        try:
+            # 辞書形式からリスト形式に変換
+            mappings_list = []
+            for exe_name, memo_name in self.mapping.items():
+                mappings_list.append({"exe_name": exe_name, "memo_name": memo_name})
+
+            data = {
+                "version": "1.0",
+                "description": "Mapping between exe names and memo names",
+                "mappings": mappings_list,
+            }
+            with open(self.mapping_file, "w", encoding="utf-8") as f:
+                yaml.dump(
+                    data,
+                    f,
+                    allow_unicode=True,
+                    default_flow_style=False,
+                    indent=2,
+                    sort_keys=False,
+                )
+            logger.debug(f"マッピングファイルを保存しました: {len(self.mapping)} 項目")
+        except Exception as e:
+            logger.error(f"マッピングファイル保存エラー: {e}")
+
+    def get_memo_name(self, exe_name: str) -> str:
+        """
+        exe名からmemo名を取得
+
+        Args:
+            exe_name: 実行可能ファイル名
+
+        Returns:
+            対応するmemo名
+        """
+        # マッピングに存在する場合はそれを使用
+        if exe_name in self.mapping:
+            memo_name = self.mapping[exe_name]
+            logger.debug(f"マッピング使用: {exe_name} -> {memo_name}")
+            return memo_name
+
+        # マッピングに存在しない場合は自動作成
+        self.mapping[exe_name] = exe_name
+        self.save_mapping()
+        logger.debug(f"新しいマッピング作成: {exe_name} -> {exe_name}")
+        return exe_name
+
+    def update_mapping(self, exe_name: str, memo_name: str):
+        """
+        マッピングを更新
+
+        Args:
+            exe_name: 実行可能ファイル名
+            memo_name: 対応するmemo名
+        """
+        self.mapping[exe_name] = memo_name
+        self.save_mapping()
+        logger.info(f"マッピングを更新しました: {exe_name} -> {memo_name}")
+
+    def get_all_mappings(self) -> dict[str, str]:
+        """全てのマッピングを取得"""
+        return self.mapping.copy()

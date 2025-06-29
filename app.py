@@ -314,13 +314,15 @@ def main(page: ft.Page):
 
             # 実際のアプリ変更時のみ処理
             app_display.update_app_name(app_name)
-            # メモファイルを作成/読み込み
+            # メモファイルを作成/読み込み（app_nameはexe名として使用）
             try:
                 memo_file = memo_manager.get_memo_file_path(app_name)
                 if not memo_file.exists():
                     memo_manager.create_memo_file(app_name)
-                memo_editor.load_memo(memo_file, app_name)
-                logger.debug(f"メモを読み込みました: {app_name}")
+                # memo_editorには表示用の名前として、マッピングされたmemo名を使用
+                memo_name = memo_manager.get_memo_name(app_name)
+                memo_editor.load_memo(memo_file, memo_name)
+                logger.debug(f"メモを読み込みました: {app_name} -> {memo_name}")
             except Exception as e:
                 logger.error(f"メモ読み込みエラー: {e}")
         # Sticky Memoにフォーカスした場合は何もしない
