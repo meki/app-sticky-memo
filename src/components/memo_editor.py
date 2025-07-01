@@ -143,16 +143,27 @@ class MemoEditor:
 
     def _update_markdown_preview(self):
         """Update markdown preview with current text content"""
-        content = self.text_area.value if self.text_area.value else ""
-        if content.strip():
-            self.markdown_preview.value = content
-        else:
-            self.markdown_preview.value = t(
-                "memo_editor.preview_empty", default="*No content to preview*"
-            )
-        # Force update the UI
-        if hasattr(self.markdown_preview, "update"):
-            self.markdown_preview.update()
+        try:
+            content = self.text_area.value if self.text_area.value else ""
+            if content.strip():
+                self.markdown_preview.value = content
+            else:
+                self.markdown_preview.value = t(
+                    "memo_editor.preview_empty", default="*No content to preview*"
+                )
+
+            # Only update if the markdown preview is initialized and added to page
+            if (
+                hasattr(self.markdown_preview, "page")
+                and self.markdown_preview.page is not None
+            ):
+                if hasattr(self.markdown_preview, "update"):
+                    self.markdown_preview.update()
+            else:
+                logger.debug("Markdown preview not yet added to page - skipping")
+
+        except Exception as e:
+            logger.warning(f"Markdown preview update failed (safe to ignore): {e}")
 
     def load_memo(self, file_path: Path, app_name: str):
         """
@@ -184,8 +195,12 @@ class MemoEditor:
 
             self.is_dirty = False
             self.save_status.visible = False
-            # Update markdown preview
-            self._update_markdown_preview()
+            # Update markdown preview only if we're on the preview tab
+            if (
+                hasattr(self, "tab_container")
+                and self.tab_container.selected_index == 1
+            ):
+                self._update_markdown_preview()
 
         except Exception as e:
             logger.error(f"Memo file load error: {e}")
@@ -264,6 +279,15 @@ class MemoEditor:
         self.current_file_path = None
         self.is_dirty = False
         self.save_status.visible = False
-        # Clear markdown preview
-        self.markdown_preview.value = ""
+        # Clear markdown preview safely
+        try:
+            self.markdown_preview.value = ""
+            if (
+                hasattr(self.markdown_preview, "page")
+                and self.markdown_preview.page is not None
+            ):
+                if hasattr(self.markdown_preview, "update"):
+                    self.markdown_preview.update()
+        except Exception as e:
+            logger.debug(f"Markdown preview clear failed (safe to ignore): {e}")
         logger.debug("Memo editor cleared")

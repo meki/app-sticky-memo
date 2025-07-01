@@ -257,6 +257,19 @@ def main(page: ft.Page):
                 settings_manager.save_settings()
                 # Also update memo manager's data directory
                 memo_manager.update_data_dir(new_data_dir)
+
+                # Reload current memo with new directory
+                try:
+                    # Save current memo before switching directories
+                    memo_editor.auto_save()
+
+                    # Clear memo editor to initial state (no memo loaded)
+                    memo_editor.clear_memo()
+                    logger.debug("Cleared memo editor after directory change")
+
+                except Exception as ex:
+                    logger.error(f"Error clearing memo after directory change: {ex}")
+
                 # Show SnackBar
                 page.snack_bar = ft.SnackBar(
                     content=ft.Text(t("messages.settings_saved"))
