@@ -13,7 +13,6 @@ datas = [
     (str(current_dir / 'src' / 'locales' / 'ja.yaml'), 'src/locales/'),
     # Assets (icons)
     (str(current_dir / 'assets' / 'app_icon.ico'), 'assets/'),
-    (str(current_dir / 'assets' / 'app_icon.png'), 'assets/'),
 ]
 
 # Define hidden imports

@@ -41,7 +41,7 @@ class MemoEditor:
             expand=True,
             hint_text=t("memo_editor.hint_text"),
             border=ft.InputBorder.OUTLINE,
-            content_padding=ft.padding.all(15),
+            content_padding=ft.padding.only(left=15, right=15, top=20, bottom=15),
             text_size=14,
             on_change=self._on_text_change,
             # Add monospace font for better markdown editing
